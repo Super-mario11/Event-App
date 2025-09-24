@@ -70,6 +70,7 @@ function App() {
               <>
                 <Route path="/checkout/:eventId" element={<Checkout />} />
                 <Route path="/dashboard" element={<UserDashboard />} />
+                  {/* <Route path="/placedOrder/:id" element={<PlaceOrder />} /> */}
               </>
             )}
           </Routes>

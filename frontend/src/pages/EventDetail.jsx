@@ -1,17 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { 
-  Calendar, 
-  MapPin, 
-  Users, 
-  Star, 
-  Share2, 
+import {
+  Calendar,
+  MapPin,
+  Users,
+  Star,
+  Share2,
   Heart,
   Clock,
   Tag,
   Plus,
-  Minus
+  Minus,
+  User,
+  IndianRupee
 } from 'lucide-react';
 import { addTicket, removeTicket } from '../store/slices/bookingSlice';
 import { format } from 'date-fns';
@@ -22,10 +24,10 @@ const EventDetail = () => {
   const dispatch = useDispatch();
   const [activeTab, setActiveTab] = useState('overview');
   const [isLiked, setIsLiked] = useState(false);
-    const [isLoading,setLoading]=useState(false)
-  
+  const [isLoading, setLoading] = useState(false)
+
   const { currentEvent } = useSelector(state => state.events);
-  console.log(currentEvent,"sc");
+  console.log(currentEvent, "sc");
   const { selectedTickets, totalAmount } = useSelector(state => state.booking);
 
   useEffect(() => {
@@ -114,16 +116,15 @@ const EventDetail = () => {
               </div>
             </div>
           </div>
-          
+
           {/* Action Buttons */}
           <div className="absolute top-6 right-6 flex space-x-3">
             <button
               onClick={() => setIsLiked(!isLiked)}
-              className={`p-3 rounded-full transition-all duration-200 ${
-                isLiked 
-                  ? 'bg-red-500 text-white' 
+              className={`p-3 rounded-full transition-all duration-200 ${isLiked
+                  ? 'bg-red-500 text-white'
                   : 'bg-white/20 backdrop-blur-sm text-white hover:bg-white/30'
-              }`}
+                }`}
             >
               <Heart className={`w-5 h-5 ${isLiked ? 'fill-current' : ''}`} />
             </button>
@@ -144,11 +145,10 @@ const EventDetail = () => {
                     <button
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id)}
-                      className={`py-4 border-b-2 font-medium text-sm transition-colors ${
-                        activeTab === tab.id
+                      className={`py-4 border-b-2 font-medium text-sm transition-colors ${activeTab === tab.id
                           ? 'border-primary-600 text-primary-600'
                           : 'border-transparent text-gray-500 hover:text-gray-700'
-                      }`}
+                        }`}
                     >
                       {tab.label}
                     </button>
@@ -163,7 +163,7 @@ const EventDetail = () => {
                       <h3 className="text-xl font-semibold text-gray-900 mb-3">About This Event</h3>
                       <p className="text-gray-700 leading-relaxed">{event.description}</p>
                     </div>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-4">
                         <div className="flex items-center space-x-3">
@@ -181,16 +181,21 @@ const EventDetail = () => {
                           </div>
                         </div>
                       </div>
-                      
+
                       <div className="space-y-4">
                         <div>
                           <h4 className="font-medium text-gray-900 mb-2">Organizer</h4>
                           <div className="flex items-center space-x-3">
-                            <img
-                              src={event.organizer.avatar}
-                              alt={event.organizer.name}
-                              className="w-10 h-10 rounded-full object-cover"
-                            />
+                            {event.organizer?.avatar && (
+
+                              <img
+                                src={event.organizer.avatar}
+                                alt={event.organizer.name}
+                                className="w-10 h-10 rounded-full object-cover"
+                              />
+                            )}
+                            <User className="w-6 h-6 text-primary-600" />
+
                             <div>
                               <div className="font-medium text-gray-900">{event.organizer.name}</div>
                               <div className="text-sm text-gray-500">Event Organizer</div>
@@ -210,8 +215,13 @@ const EventDetail = () => {
                         <div className="flex items-center justify-between">
                           <div>
                             <h4 className="font-medium text-gray-900">{ticket.type}</h4>
-                            <p className="text-gray-600">${ticket.price}</p>
-                            <p className="text-sm text-gray-500">{ticket.available} available</p>
+
+                            <div className='flex items-center'>
+                            <IndianRupee className='h-4 '/>
+                            <p className="text-gray-600">
+                            {ticket.price}</p>
+                            </div>
+                            <p className="text-sm text-gray-500">{ticket.quantity} available</p>
                           </div>
                           <div className="flex items-center space-x-3">
                             <button
@@ -255,7 +265,7 @@ const EventDetail = () => {
           <div className="lg:col-span-1">
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sticky top-24">
               <h3 className="text-xl font-semibold text-gray-900 mb-6">Book Your Tickets</h3>
-              
+
               {selectedTickets.length > 0 ? (
                 <div className="space-y-4">
                   {selectedTickets.map((ticket, index) => (
@@ -265,19 +275,26 @@ const EventDetail = () => {
                         <div className="text-sm text-gray-500">x{ticket.quantity}</div>
                       </div>
                       <div className="text-right">
-                        <div className="font-medium text-gray-900">${ticket.price * ticket.quantity}</div>
+                          <div className='flex items-center'>
+                            <IndianRupee className='h-3 '/>
+                        <div className="font-medium text-gray-900">{ticket.price * ticket.quantity}</div>
+                        </div>
                       </div>
                     </div>
                   ))}
-                  
+
                   <div className="border-t border-gray-200 pt-4">
                     <div className="flex justify-between items-center mb-6">
                       <span className="text-lg font-semibold text-gray-900">Total</span>
-                      <span className="text-2xl font-bold text-primary-600">${totalAmount}</span>
+                      
+                            <div className='flex  text-primary-600 items-center'>
+                            <IndianRupee className='h-5 '/>
+                      <span className="text-2xl font-bold text-primary-600">{totalAmount}</span>
+                      </div>
                     </div>
-                    
+
                     <Link
-                      to={`/checkout/${event.id}`}
+                      to={`/checkout/${event._id}`}
                       className="w-full btn-primary text-center block"
                     >
                       Proceed to Checkout

@@ -1,7 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { CreditCard, Lock, User, Mail, Phone, ArrowLeft, Check } from 'lucide-react';
+import { Lock, User, Mail, Phone, ArrowLeft, Check, IndianRupee } from 'lucide-react';
+import { setCurrentEvent } from '../store/slices/eventsSlice';
+import { createBooking } from '../helpers/createBooking,js'
+import { makePayment } from '../helpers/makePayment';
 
 const Checkout = () => {
   const { eventId } = useParams();
@@ -14,9 +17,35 @@ const Checkout = () => {
     phone: '',
     paymentMethod: 'card',
   });
-
-  const { selectedTickets, totalAmount, isLoading } = useSelector(state => state.booking);
   const { currentEvent } = useSelector(state => state.events);
+  const data = useSelector(state => state.booking);
+  console.log(data);
+
+  // console.log(currentEvent,"sc");
+  const { selectedTickets, totalAmount, isLoading } = useSelector(state => state.booking);
+
+  useEffect(() => {
+    if (eventId) {
+      dispatch(setCurrentEvent(eventId));
+    }
+  }, [dispatch, eventId]);
+
+
+  if (currentStep === 2) {
+    
+    const bookinghandler = async () => {
+      const booking = await createBooking(formData, eventId, selectedTickets, totalAmount)
+      console.log(totalAmount);
+      try {      
+        // makePayment(booking, booking.order);
+      } catch (error) {
+        console.log(error.message);
+      }
+      
+    }
+    bookinghandler()
+
+  }
 
   const steps = [
     { id: 1, title: 'Attendee Info' },
@@ -32,20 +61,13 @@ const Checkout = () => {
   };
 
 
-  
+
   const handleSubmit = (e) => {
     e.preventDefault();
     if (currentStep < 3) {
       setCurrentStep(currentStep + 1);
     } else {
-      // Process payment and create booking
-      
-      // dispatch(createBooking({
-      //   eventId,
-      //   tickets: selectedTickets,
-      //   attendeeInfo: formData,
-      //   totalAmount,
-      // }));
+
     }
   };
 
@@ -90,13 +112,12 @@ const Checkout = () => {
               <div className="flex items-center justify-between">
                 {steps.map((step, index) => (
                   <div key={step.id} className="flex items-center">
-                    <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all duration-200 ${
-                      currentStep >= step.id
+                    <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all duration-200 ${currentStep >= step.id
                         ? 'bg-primary-600 border-primary-600 text-white'
                         : currentStep > step.id
-                        ? 'bg-green-600 border-green-600 text-white'
-                        : 'bg-white border-gray-200 text-gray-400'
-                    }`}>
+                          ? 'bg-green-600 border-green-600 text-white'
+                          : 'bg-white border-gray-200 text-gray-400'
+                      }`}>
                       {currentStep > step.id ? (
                         <Check className="w-5 h-5" />
                       ) : (
@@ -104,9 +125,8 @@ const Checkout = () => {
                       )}
                     </div>
                     {index < steps.length - 1 && (
-                      <div className={`w-16 h-0.5 mx-4 transition-colors duration-200 ${
-                        currentStep > step.id ? 'bg-green-600' : currentStep >= step.id ? 'bg-primary-600' : 'bg-gray-200'
-                      }`}></div>
+                      <div className={`w-16 h-0.5 mx-4 transition-colors duration-200 ${currentStep > step.id ? 'bg-green-600' : currentStep >= step.id ? 'bg-primary-600' : 'bg-gray-200'
+                        }`}></div>
                     )}
                   </div>
                 ))}
@@ -114,9 +134,8 @@ const Checkout = () => {
               <div className="mt-4 flex justify-between">
                 {steps.map((step) => (
                   <div key={step.id} className="text-center flex-1">
-                    <div className={`text-sm font-medium transition-colors duration-200 ${
-                      currentStep >= step.id ? 'text-primary-600' : 'text-gray-400'
-                    }`}>
+                    <div className={`text-sm font-medium transition-colors duration-200 ${currentStep >= step.id ? 'text-primary-600' : 'text-gray-400'
+                      }`}>
                       {step.title}
                     </div>
                   </div>
@@ -130,7 +149,7 @@ const Checkout = () => {
                 {currentStep === 1 && (
                   <div className="space-y-6">
                     <h2 className="text-xl font-semibold text-gray-900">Attendee Information</h2>
-                    
+
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Full Name *
@@ -190,30 +209,15 @@ const Checkout = () => {
                 {currentStep === 2 && (
                   <div className="space-y-6">
                     <h2 className="text-xl font-semibold text-gray-900">Payment Information</h2>
-                    
+
                     <div className="space-y-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-3">
                           Payment Method
                         </label>
                         <div className="space-y-3">
-                          {[
-                            { id: 'card', label: 'Credit/Debit Card', icon: CreditCard },
-                            { id: 'upi', label: 'UPI', icon: Phone },
-                          ].map((method) => (
-                            <label key={method.id} className="flex items-center space-x-3 p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
-                              <input
-                                type="radio"
-                                name="paymentMethod"
-                                value={method.id}
-                                checked={formData.paymentMethod === method.id}
-                                onChange={handleInputChange}
-                                className="w-4 h-4 text-primary-600 focus:ring-primary-500"
-                              />
-                              <method.icon className="w-5 h-5 text-gray-600" />
-                              <span className="font-medium text-gray-900">{method.label}</span>
-                            </label>
-                          ))}
+                          {/* <BookEvent id={eventId} /> */}
+
                         </div>
                       </div>
 
@@ -317,16 +321,16 @@ const Checkout = () => {
           <div className="lg:col-span-1">
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sticky top-24">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Order Summary</h3>
-              
+
               {currentEvent && (
                 <div className="mb-6">
                   <img
-                    src={currentEvent.image}
+                    src={currentEvent.images[0]}
                     alt={currentEvent.title}
                     className="w-full h-32 object-cover rounded-lg mb-3"
                   />
                   <h4 className="font-medium text-gray-900">{currentEvent.title}</h4>
-                  <p className="text-sm text-gray-600">{currentEvent.date} at {currentEvent.time}</p>
+                  <p className="text-sm text-gray-600">{currentEvent.date.slice(0, 10)} at {currentEvent.time}</p>
                 </div>
               )}
 
@@ -338,7 +342,14 @@ const Checkout = () => {
                       <div className="text-sm text-gray-500">Qty: {ticket.quantity}</div>
                     </div>
                     <div className="text-gray-900 font-medium">
-                      ${ticket.price * ticket.quantity}
+                    <div className='flex   items-center'>
+                                              <IndianRupee className='h-3 '/>
+                     <p>
+                  
+                      {ticket.price * ticket.quantity}
+                     </p>
+                    </div>
+
                     </div>
                   </div>
                 ))}
@@ -347,15 +358,26 @@ const Checkout = () => {
               <div className="border-t border-gray-200 pt-4">
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-gray-600">Subtotal</span>
-                  <span className="text-gray-900">${totalAmount}</span>
+                    <div className='flex   items-center'>
+                                              <IndianRupee className='h-3 '/>
+                  <span className="text-gray-900">{totalAmount}</span>
+                </div>
                 </div>
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-gray-600">Service Fee</span>
-                  <span className="text-gray-900">$2.99</span>
+                      <div className='flex   items-center'>
+                                              <IndianRupee className='h-3 '/>
+                  <span className="text-gray-900">2.99</span>
+                  </div>
                 </div>
                 <div className="flex justify-between items-center text-lg font-bold pt-2 border-t border-gray-200">
                   <span className="text-gray-900">Total</span>
-                  <span className="text-primary-600">${totalAmount + 2.99}</span>
+                    <div className='flex text-primary-600  items-center'>
+                                              <IndianRupee className='h-4 '/>
+                  <span className="text-primary-600">
+                    {totalAmount + 2.99}</span>
+                </div>
+
                 </div>
               </div>
             </div>

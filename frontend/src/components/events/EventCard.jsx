@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, MapPin, Users, Star } from 'lucide-react';
+import { Calendar, MapPin, Users, Star, IndianRupee } from 'lucide-react';
 import { format } from 'date-fns';
 
 const EventCard = ({ event }) => {
@@ -79,7 +79,12 @@ const EventCard = ({ event }) => {
             </div>
             <div className="text-right">
               <div className="text-lg font-bold text-primary-600">
-                ${event.price}
+                <div className='flex  text-primary-600 items-center'>
+                  <IndianRupee className='h-4 ' />
+                  <p>
+                    {event.price}
+                  </p>
+                </div>
               </div>
               <div className="text-sm text-gray-500">per ticket</div>
             </div>
