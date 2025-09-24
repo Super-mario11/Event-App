@@ -3,7 +3,7 @@ const router = express.Router();
 const {
   logoutUser,
   getUserProfile,
-  updateImage,
+  updateProfile,
   sendOtpForPasswordReset,
   verifyOtpAndResetPassword,
   loginUser,
@@ -21,7 +21,7 @@ router.get('/profile', protect, getUserProfile);
 router.get("/dashboard", protect, getUserDashboard);
 router.post('/forgot-password', sendOtpForPasswordReset);
 router.post('/reset-password', verifyOtpAndResetPassword);
-router.put('/profileImage', protect, upload.single("avatar"), updateImage);
+router.put('/update-profile', protect, upload.single("avatar"), updateProfile);
 
 
 module.exports = router;

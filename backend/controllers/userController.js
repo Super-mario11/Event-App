@@ -65,6 +65,8 @@ exports.loginUser = async (req, res) => {
       user: {
         id: user._id,
         name: user.name,
+        avatar:user.avatar,
+        phoneNo:user.phoneNo,
         email: user.email,
         role: user.role
       }
@@ -123,33 +125,41 @@ exports.getUserById = async (req, res) => {
   }
 };
 
-exports.updateImage = async (req, res) => {
-  const profileImage = req.file.path;
-  if (!profileImage) {
-    throw new ApiError(400, " profileImage is not found")
-  }
-  const uploadedImage = await uploadOnCloudinary(profileImage)
-  if (!uploadedImage.url) {
-    throw new ApiError(500, " profileImage uploaded url missing")
-  }
+exports.updateProfile = async (req, res) => {
+ try{
+  const { name, phone } = req.body;
+    let avatarUrl;
 
-  const user = await User.findByIdAndUpdate(
-    req.user?.id,
-    {
-      $set:
-      {
-        avatar: uploadedImage.url
+    if (req.file) {
+      const uploadedImage = await uploadOnCloudinary(req.file.path);
+      if (uploadedImage && uploadedImage.url) {
+        avatarUrl = uploadedImage.url;
       }
-    },
-    {
-      new: true
-    }).select("-password")
-  user.save()
-  res
-    .status(200)
-    .json( user, "avatar image update successfully")
-}
+    }
 
+    // Update user
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user.id,
+      {
+        $set: {
+          ...(name && { name }),
+          ...(phone && { phoneNo:phone }),
+          ...(avatarUrl && { avatar: avatarUrl })
+        },
+      },
+      { new: true } // return updated doc
+    ).select('-password'); // exclude password
+
+    res.status(200).json({
+      success: true,
+      message: 'Profile updated successfully',
+      user: updatedUser,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Something went wrong' });
+  }
+};
 
 
 exports.sendOtpForPasswordReset = async (req, res) => {

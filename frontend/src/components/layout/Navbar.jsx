@@ -72,10 +72,11 @@ const Navbar = () => {
                   <span className="font-medium">{user?.name || 'User'}</span>
                 </button>
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-                  <Link to="/dashboard" className="flex px-4 py-2 text-gray-700 hover:bg-gray-50  items-center space-x-2">
-                    <User className="w-4 h-4" />
-                    <span>My Dashboard</span>
-                  </Link>
+                  {user?.role === "user" && (
+                    <Link to="/dashboard" className="flex px-4 py-2 text-gray-700 hover:bg-gray-50  items-center space-x-2">
+                      <User className="w-4 h-4" />
+                      <span>My Dashboard</span>
+                    </Link>)}
                   {user?.role === "organizer" && (
                     <Link to="/organizer-dashboard" className=" flex px-4 py-2 text-gray-700 hover:bg-gray-50  items-center space-x-2">
 
@@ -131,9 +132,12 @@ const Navbar = () => {
               </Link>
               {user ? (
                 <>
-                  <Link to="/dashboard" className="block py-2 text-gray-700 hover:text-primary-600 font-medium">
-                    My Dashboard
-                  </Link>
+                  {user?.role === "user" && (
+                    <Link to="/dashboard" className="block py-2 text-gray-700 hover:text-primary-600 font-medium">
+                      My Dashboard
+                    </Link>
+                  )
+                  }
                   {user?.role === "organizer" && (
                     <>
                       <Link to="/organizer-dashboard" className="block py-2 text-gray-700 hover:text-primary-600 font-medium">
