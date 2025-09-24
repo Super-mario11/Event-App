@@ -29,21 +29,20 @@ const bookingSchema = new mongoose.Schema(
 
     paymentMethod: {
       type: String,
-      enum: ["card", "upi"],
+      enum: ["card", "upi","bank"],
       required: true,
     },
 
     status: {
       type: String,
-      enum: ["confirmed", "cancelled", "refunded"],
+      enum: ["created","confirmed", "cancelled", "refunded"],
       default: "confirmed",
     },
 
-    bookingId: {
-      type: String,
-      unique: true,
-    },
-
+    razorpayOrderId: {
+  type: String,
+  unique: true,  // optional, but ensures no duplicates
+},
     qrCode: String,
     paymentId: String,
   },
