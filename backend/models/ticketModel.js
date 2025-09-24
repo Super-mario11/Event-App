@@ -3,8 +3,7 @@ const mongoose = require("mongoose");
 const ticketSchema = new mongoose.Schema({
   type: { type: String, required: true },
   price: { type: Number, required: true },
-  available: { type: Number, required: true },
-  total: { type: Number, required: true },
-});
-
-module.exports = { ticketSchema }; // sirf schema export karo
+  quantity: { type: Number, required: true },
+   sold: { type: Number, default: 0 }
+}, { _id: false });
+module.exports={ticketSchema}

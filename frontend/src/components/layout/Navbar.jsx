@@ -9,7 +9,7 @@ const Navbar = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { isMobileMenuOpen, searchQuery } = useSelector(state => state.ui);
-  const { isAuthenticated, user } = useSelector(state => state.auth);
+  const { user } = useSelector(state => state.auth);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -55,27 +55,34 @@ const Navbar = () => {
             <Link to="/events" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
               Browse Events
             </Link>
-            {user &&(
-              <Link to="/create-event" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
-              Create Event
-            </Link>)
+            {user?.role === "organizer" && (
+              <>
+                <Link to="/create-event" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
+                  Create Event
+                </Link>
+
+              </>
+            )
             }
-            
-            {isAuthenticated ? (
+
+            {user ? (
               <div className="relative group">
                 <button className="flex items-center space-x-2 text-gray-700 hover:text-primary-600">
                   <User className="w-5 h-5" />
                   <span className="font-medium">{user?.name || 'User'}</span>
                 </button>
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-                  <Link to="/dashboard" className="block px-4 py-2 text-gray-700 hover:bg-gray-50  items-center space-x-2">
+                  <Link to="/dashboard" className="flex px-4 py-2 text-gray-700 hover:bg-gray-50  items-center space-x-2">
                     <User className="w-4 h-4" />
                     <span>My Dashboard</span>
                   </Link>
-                  <Link to="/organizer-dashboard" className="block px-4 py-2 text-gray-700 hover:bg-gray-50  items-center space-x-2">
-                    <Settings className="w-4 h-4" />
-                    <span>Organizer Panel</span>
-                  </Link>
+                  {user?.role === "organizer" && (
+                    <Link to="/organizer-dashboard" className=" flex px-4 py-2 text-gray-700 hover:bg-gray-50  items-center space-x-2">
+
+                      <Settings className="w-4 h-4" />
+                      <span>Organizer Panel</span>
+                    </Link>
+                  )}
                   <button onClick={handleLogout} className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-50 flex items-center space-x-2">
                     <LogOut className="w-4 h-4" />
                     <span>Logout</span>
@@ -122,17 +129,21 @@ const Navbar = () => {
               <Link to="/events" className="block py-2 text-gray-700 hover:text-primary-600 font-medium">
                 Browse Events
               </Link>
-              <Link to="/create-event" className="block py-2 text-gray-700 hover:text-primary-600 font-medium">
-                Create Event
-              </Link>
-              {isAuthenticated ? (
+              {user ? (
                 <>
                   <Link to="/dashboard" className="block py-2 text-gray-700 hover:text-primary-600 font-medium">
                     My Dashboard
                   </Link>
-                  <Link to="/organizer-dashboard" className="block py-2 text-gray-700 hover:text-primary-600 font-medium">
-                    Organizer Panel
-                  </Link>
+                  {user?.role === "organizer" && (
+                    <>
+                      <Link to="/organizer-dashboard" className="block py-2 text-gray-700 hover:text-primary-600 font-medium">
+                        Organizer Panel
+                      </Link>
+                      <Link to="/create-event" className="block py-2 text-gray-700 hover:text-primary-600 font-medium">
+                        Create Event
+                      </Link>
+                    </>
+                  )}
                   <button onClick={handleLogout} className="block w-full text-left py-2 text-gray-700 hover:text-primary-600 font-medium">
                     Logout
                   </button>

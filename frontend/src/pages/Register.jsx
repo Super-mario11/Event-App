@@ -1,34 +1,24 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { User, Mail, Lock, Eye, EyeOff, Calendar } from 'lucide-react';
-import { registerUser, clearError } from '../store/slices/authSlice';
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { User, Mail, Lock, Eye, EyeOff, Calendar } from "lucide-react";
+import axiosInstance from "../config/apiconfig";
 
 const Register = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    role: 'user', // default role
+    name: "",
+    email: "",
+    password: "",
+    phoneNo: "",
+    confirmPassword: "",
+    role: "user", // default role
   });
-
-  const { isLoading, error, isAuthenticated } = useSelector(state => state.auth);
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      navigate('/dashboard');
-    }
-  }, [isAuthenticated, navigate]);
-
-  useEffect(() => {
-    return () => {
-      dispatch(clearError());
-    };
-  }, [dispatch]);
 
   const handleChange = (e) => {
     setFormData({
@@ -37,19 +27,27 @@ const Register = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (formData.password !== formData.confirmPassword) {
+      alert("Passwords do not match");
       return;
     }
 
-    dispatch(registerUser({
-      name: formData.name,
-      email: formData.email,
-      password: formData.password,
-      role: formData.role, // include role
-    }));
+    setIsLoading(true);
+    try {
+      const response = await axiosInstance.post("/users/register", formData);
+
+      if (response.data) {
+        // dispatch login after successful register
+        navigate("/login"); // redirect to home or dashboard
+      }
+    } catch (error) {
+      alert(error.response?.data?.message || "Registration failed");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -63,17 +61,13 @@ const Register = () => {
             <span className="text-2xl font-bold gradient-text">EventHive</span>
           </div>
           <h2 className="text-3xl font-bold text-gray-900">Create your account</h2>
-          <p className="mt-2 text-gray-600">Join EventHive and start discovering amazing events</p>
+          <p className="mt-2 text-gray-600">
+            Join EventHive and start discovering amazing events
+          </p>
         </div>
 
         <div className="bg-white py-8 px-6 shadow-xl rounded-2xl border border-gray-100">
           <form className="space-y-6" onSubmit={handleSubmit}>
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-                {error}
-              </div>
-            )}
-
             {/* Name */}
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
@@ -124,7 +118,7 @@ const Register = () => {
                 <input
                   id="password"
                   name="password"
-                  type={showPassword ? 'text' : 'password'}
+                  type={showPassword ? "text" : "password"}
                   required
                   value={formData.password}
                   onChange={handleChange}
@@ -159,12 +153,13 @@ const Register = () => {
                   placeholder="Confirm your password"
                 />
               </div>
-              {formData.password !== formData.confirmPassword && formData.confirmPassword && (
-                <p className="text-red-500 text-sm mt-1">Passwords don't match</p>
-              )}
+              {formData.password !== formData.confirmPassword &&
+                formData.confirmPassword && (
+                  <p className="text-red-500 text-sm mt-1">Passwords don't match</p>
+                )}
             </div>
 
-            {/* Role Selection */}
+            {/* Role */}
             <div>
               <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-2">
                 Select Role
@@ -177,7 +172,7 @@ const Register = () => {
                 className="input-field"
               >
                 <option value="user">User</option>
-                <option value="manager">Manager</option>
+                <option value="organizer">Organizer</option>
               </select>
             </div>
 
@@ -191,11 +186,11 @@ const Register = () => {
                 className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
               />
               <label htmlFor="terms" className="ml-2 block text-sm text-gray-700">
-                I agree to the{' '}
+                I agree to the{" "}
                 <Link to="/terms" className="text-primary-600 hover:text-primary-500">
                   Terms of Service
-                </Link>{' '}
-                and{' '}
+                </Link>{" "}
+                and{" "}
                 <Link to="/privacy" className="text-primary-600 hover:text-primary-500">
                   Privacy Policy
                 </Link>
@@ -208,7 +203,7 @@ const Register = () => {
               disabled={isLoading || formData.password !== formData.confirmPassword}
               className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? 'Creating account...' : 'Create account'}
+              {isLoading ? "Creating account..." : "Create account"}
             </button>
 
             <div className="text-center">

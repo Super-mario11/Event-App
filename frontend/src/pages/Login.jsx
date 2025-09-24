@@ -1,31 +1,22 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { Mail, Lock, Eye, EyeOff, Calendar } from 'lucide-react';
-import { loginUser, clearError } from '../store/slices/authSlice';
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { Mail, Lock, Eye, EyeOff, Calendar } from "lucide-react";
+import axiosInstance from "../config/apiconfig";
+import { login } from "../store/slices/authSlice";
 
 const Login = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
+    email: "",
+    password: "",
   });
-
-  const { isLoading, error, isAuthenticated } = useSelector(state => state.auth);
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      navigate('/dashboard');
-    }
-  }, [isAuthenticated, navigate]);
-
-  useEffect(() => {
-    return () => {
-      dispatch(clearError());
-    };
-  }, [dispatch]);
 
   const handleChange = (e) => {
     setFormData({
@@ -34,9 +25,29 @@ const Login = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    dispatch(loginUser(formData));
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await axiosInstance.post("/users/login", formData);
+
+      // Save token if provided
+      if (response.data.token) {
+        sessionStorage.setItem("token", response.data.token);
+      }
+
+      // Dispatch to redux store
+      dispatch(login({ user: response.data.user }));
+
+      // Navigate to home or dashboard
+      navigate("/");
+    } catch (error) {
+      setError(error.response?.data?.message || "Login failed");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -61,6 +72,7 @@ const Login = () => {
               </div>
             )}
 
+            {/* Email */}
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
                 Email address
@@ -80,6 +92,7 @@ const Login = () => {
               </div>
             </div>
 
+            {/* Password */}
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
                 Password
@@ -89,7 +102,7 @@ const Login = () => {
                 <input
                   id="password"
                   name="password"
-                  type={showPassword ? 'text' : 'password'}
+                  type={showPassword ? "text" : "password"}
                   required
                   value={formData.password}
                   onChange={handleChange}
@@ -106,6 +119,7 @@ const Login = () => {
               </div>
             </div>
 
+            {/* Remember me + Forgot password */}
             <div className="flex items-center justify-between">
               <div className="flex items-center">
                 <input
@@ -124,12 +138,13 @@ const Login = () => {
               </Link>
             </div>
 
+            {/* Submit */}
             <button
               type="submit"
               disabled={isLoading}
               className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? 'Signing in...' : 'Sign in'}
+              {isLoading ? "Signing in..." : "Sign in"}
             </button>
 
             <div className="text-center">

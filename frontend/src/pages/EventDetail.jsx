@@ -13,22 +13,24 @@ import {
   Plus,
   Minus
 } from 'lucide-react';
-import { fetchEventById } from '../store/slices/eventsSlice';
 import { addTicket, removeTicket } from '../store/slices/bookingSlice';
 import { format } from 'date-fns';
+import { setCurrentEvent } from '../store/slices/eventsSlice';
 
 const EventDetail = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
   const [activeTab, setActiveTab] = useState('overview');
   const [isLiked, setIsLiked] = useState(false);
+    const [isLoading,setLoading]=useState(false)
   
-  const { currentEvent, isLoading } = useSelector(state => state.events);
+  const { currentEvent } = useSelector(state => state.events);
+  console.log(currentEvent,"sc");
   const { selectedTickets, totalAmount } = useSelector(state => state.booking);
 
   useEffect(() => {
     if (id) {
-      dispatch(fetchEventById(id));
+      dispatch(setCurrentEvent(id));
     }
   }, [dispatch, id]);
 
@@ -81,7 +83,7 @@ const EventDetail = () => {
         {/* Event Banner */}
         <div className="relative overflow-hidden rounded-2xl mb-8">
           <img
-            src={event.image}
+            src={event.images[0]}
             alt={event.title}
             className="w-full h-64 lg:h-96 object-cover"
           />

@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { CreditCard, Lock, User, Mail, Phone, ArrowLeft, Check } from 'lucide-react';
-import { createBooking } from '../store/slices/bookingSlice';
 
 const Checkout = () => {
   const { eventId } = useParams();
@@ -32,18 +31,21 @@ const Checkout = () => {
     });
   };
 
+
+  
   const handleSubmit = (e) => {
     e.preventDefault();
     if (currentStep < 3) {
       setCurrentStep(currentStep + 1);
     } else {
       // Process payment and create booking
-      dispatch(createBooking({
-        eventId,
-        tickets: selectedTickets,
-        attendeeInfo: formData,
-        totalAmount,
-      }));
+      
+      // dispatch(createBooking({
+      //   eventId,
+      //   tickets: selectedTickets,
+      //   attendeeInfo: formData,
+      //   totalAmount,
+      // }));
     }
   };
 

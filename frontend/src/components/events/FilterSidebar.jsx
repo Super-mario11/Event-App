@@ -6,8 +6,9 @@ import { Calendar, DollarSign, MapPin, Tag } from 'lucide-react';
 const FilterSidebar = () => {
   const dispatch = useDispatch();
   const { filters, categories } = useSelector(state => state.events);
-
+console.log(filters,categories);
   const handleFilterChange = (filterType, value) => {
+    console.log("aay",filterType,value);
     dispatch(setFilters({ [filterType]: value }));
   };
 

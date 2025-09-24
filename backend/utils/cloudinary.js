@@ -10,7 +10,10 @@ cloudinary.config({
 });
 
 exports.uploadOnCloudinary = async (localFilePath) => {
-  console.log(  "cloud_name", process.env.CLOUDINARY_CLOUD_NAME)
+  console.log("cloud_name", process.env.CLOUDINARY_CLOUD_NAME)
+  console.log("cloud_key", process.env.CLOUDINARY_API_KEY)
+  console.log("secret", process.env.CLOUDINARY_API_SECRET)
+
   try {
     if (!localFilePath) {
       console.log('No file path provided.');

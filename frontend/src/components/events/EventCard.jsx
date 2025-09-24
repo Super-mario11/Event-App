@@ -13,12 +13,12 @@ const EventCard = ({ event }) => {
   };
 
   return (
-    <Link to={`/event/${event.id}`} className="block group">
+    <Link to={`/event/${event._id}`} className="block group">
       <div className="card overflow-hidden">
         {/* Image */}
         <div className="relative overflow-hidden">
           <img
-            src={event.image}
+            src={event.images[0]}
             alt={event.title}
             className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
           />
@@ -71,8 +71,8 @@ const EventCard = ({ event }) => {
           <div className="flex items-center justify-between pt-4 border-t border-gray-100">
             <div className="flex items-center space-x-3">
               <img
-                src={event.organizer.avatar}
-                alt={event.organizer.name}
+                src={event.organizer?.avatar || ""}
+                alt={event.organizer?.name}
                 className="w-8 h-8 rounded-full object-cover"
               />
               <span className="text-sm text-gray-600">{event.organizer.name}</span>

@@ -1,6 +1,7 @@
-const {Event} =require("../models/Event.js");
-const { uploadOnCloudinary } = require("../utils/cloudinary.js");
+const Event = require('../models/eventModel'); 
+const { uploadOnCloudinary } = require("../utils/cloudinary");
 
+// ✅ GET /events
 const getEvents = async (req, res) => {
   try {
     const {
@@ -17,16 +18,18 @@ const getEvents = async (req, res) => {
     } = req.query;
 
     const filter = {};
+
     if (category) filter.category = category;
     if (location) filter.venue = { $regex: location, $options: "i" };
     if (date) filter.date = date;
     if (featured) filter.featured = featured === "true";
 
-    if (search)
+    if (search) {
       filter.$or = [
         { title: { $regex: search, $options: "i" } },
         { description: { $regex: search, $options: "i" } },
       ];
+    }
 
     if (priceMin || priceMax) {
       filter.price = {};
@@ -34,14 +37,16 @@ const getEvents = async (req, res) => {
       if (priceMax) filter.price.$lte = Number(priceMax);
     }
 
-    const sortOptions = {
-      date: { date: 1 },
-      price: { price: 1 },
-      rating: { rating: -1 },
-      popular: { attendees: -1 },
-    }[sortBy] || { createdAt: -1 };
+    const sortOptions =
+      {
+        date: { date: 1 },
+        price: { price: 1 },
+        rating: { rating: -1 },
+        popular: { attendees: -1 },
+      }[sortBy] || { createdAt: -1 };
 
     const skip = (page - 1) * limit;
+
     const [events, totalItems] = await Promise.all([
       Event.find(filter).sort(sortOptions).skip(skip).limit(Number(limit)),
       Event.countDocuments(filter),
@@ -65,130 +70,166 @@ const getEvents = async (req, res) => {
   }
 };
 
-/* GET /events/:id */
- const getEventById = async (req, res) => {
+// ✅ GET /events/:id
+const getEventById = async (req, res) => {
   try {
     const event = await Event.findById(req.params.id);
-    if (!event) return res.status(404).json({ success: false, message: "Event not found" });
+    if (!event)
+      return res
+        .status(404)
+        .json({ success: false, message: "Event not found" });
+
     res.json({ success: true, data: event });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
 };
 
-/* POST /events */
- const createEvent = async (req, res) => {
+const createEvent = async (req, res) => {
   try {
-      let imageUrls = [];
-    if (req.files && req.files.length > 0) {
+    console.log("User:", req.user);
+
+    // Upload images
+    let imageUrls = [];
+    if (req.files?.length > 0) {
       for (const file of req.files) {
         const uploaded = await uploadOnCloudinary(file.path, "events");
-        if (!uploaded || !uploaded.url) {
-          throw new ApiError(500, "Image uploaded url missing");
-        }
-        imageUrls.push(uploaded.url);
+        if (uploaded?.url) imageUrls.push(uploaded.url);
       }
     }
 
-    const event = await Event.create({
-      title: req.body.title,
-      description: req.body.description,
-      category: req.body.category,
-      date: req.body.date,
-      time: req.body.time,
-      venue: req.body.venue,
-      price: req.body.price,
-      organizer: req.body.organizer,
-      tickets: req.body.tickets,
-      images: imageUrls,
-    });
+    // Parse form-data JSON
+    let data = req.body;
+
+    if (typeof req.body.eventData === "string") {
+      data = JSON.parse(req.body.eventData);
+    }
+console.log(data);
+    // Explicitly map fields
+    const newEvent = {
+      title: data.title,
+      description: data.description,
+      category: data.category,
+      date: data.date,
+      time: data.time,
+      venue: data.location || data.venue, // your schema uses 'venue'
+      images: imageUrls,                  // all images
+      price: parseFloat(data.generalPrice) || 0,
+      organizer: {
+        name: req.user.name,
+        avatar: req.user.avatar || ""
+      },
+      tickets: [],
+      featured: data.featured || false,
+      attendees:data.attendees|| 0,
+      rating: 0
+    };
+
+ if (data.generalPrice && parseFloat(data.generalPrice) > 0) {
+  newEvent.tickets.push({
+    type: "General Admission",
+    price: parseFloat(data.generalPrice),
+    quantity: parseInt(data.generalQuantity) || 100,
+    sold: 0
+  });
+}
+
+if (data.vipPrice && parseFloat(data.vipPrice) > 0) {
+  newEvent.tickets.push({
+    type: "VIP",
+    price: parseFloat(data.vipPrice),
+    quantity: parseInt(data.vipQuantity) || 50,
+    sold: 0
+  });
+}
+
+    // Create in DB
+    const event = await Event.create(newEvent);
 
     res.status(201).json({
       success: true,
       message: "Event created successfully",
-      data: event,
+      data: event
     });
-  } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+
+  } catch (error) {
+    console.error("Error creating event:", error);
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
-/* PUT /events/:id */
- const updateEvent = async (req, res, next) => {
+
+// ✅ PUT /events/:id
+const updateEvent = async (req, res) => {
   try {
     const eventId = req.params.id;
     const event = await Event.findById(eventId);
-    if (!event) {
-      throw new ApiError(404, "Event not found");
-    }
+    if (!event)
+      return res
+        .status(404)
+        .json({ success: false, message: "Event not found" });
 
-    let newImages = event.images; // purani images rakhne ke liye
-    if (req.files && req.files.length > 0) {
+    let newImages = event.images;
+    if (req.files?.length > 0) {
       newImages = [];
       for (const file of req.files) {
         const uploaded = await uploadOnCloudinary(file.path, "events");
-        if (!uploaded || !uploaded.url) {
-          throw new ApiError(500, "Image uploaded url missing");
-        }
-        newImages.push(uploaded.url);
+        if (uploaded?.url) newImages.push(uploaded.url);
       }
     }
 
     const updated = await Event.findByIdAndUpdate(
       eventId,
-      {
-        $set: {
-          title: req.body.title || event.title,
-          description: req.body.description || event.description,
-          category: req.body.category || event.category,
-          date: req.body.date || event.date,
-          time: req.body.time || event.time,
-          venue: req.body.venue || event.venue,
-          price: req.body.price || event.price,
-          organizer: req.body.organizer || event.organizer,
-          tickets: req.body.tickets || event.tickets,
-          images: newImages,
-        },
-      },
+      { ...req.body, images: newImages },
       { new: true }
     );
 
     res.json({ success: true, data: updated });
   } catch (err) {
-    next(err);
+    res.status(500).json({ success: false, message: err.message });
   }
 };
-/* DELETE /events/:id */
- const deleteEvent = async (req, res) => {
+
+// ✅ DELETE /events/:id
+const deleteEvent = async (req, res) => {
   try {
     const event = await Event.findByIdAndDelete(req.params.id);
-    if (!event) return res.status(404).json({ success: false, message: "Event not found" });
+    if (!event)
+      return res
+        .status(404)
+        .json({ success: false, message: "Event not found" });
+
     res.json({ success: true, message: "Event deleted successfully" });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
 };
 
-/* GET /events/categories */
- const getCategories = async (_, res) => {
-  const categories = await Event.aggregate([
-    { $group: { _id: "$category", count: { $sum: 1 } } },
-  ]);
-  res.json({
-    success: true,
-    data: {
-      categories: categories.map((c) => ({
+// ✅ GET /events/categories
+const getCategories = async (_, res) => {
+  try {
+    const categories = await Event.aggregate([
+      { $group: { _id: "$category", count: { $sum: 1 } } },
+    ]);
+
+    res.json({
+      success: true,
+      data: categories.map((c) => ({
         name: c._id,
         count: c.count,
         icon: "tag", // placeholder
       })),
-    },
-  });
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
 };
 
-module.exports={  getEvents,
+module.exports = {
+  getEvents,
   getEventById,
   createEvent,
   updateEvent,
   deleteEvent,
-  getCategories}
+  getCategories,
+};

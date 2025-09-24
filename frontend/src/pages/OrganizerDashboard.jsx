@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   BarChart3, 
   Calendar, 
@@ -12,9 +12,33 @@ import {
   Download
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import axiosInstance from '../config/apiconfig';
+import Loader from '../components/Loader';
 
 const OrganizerDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
+  const [loading, setLoading] = useState(false);
+  const[ myEvents,setMyEvents]= useState([])
+
+  useEffect(() => {
+    const fetchOrganizerEvents = async () => {
+      try {
+        setLoading(true);
+        const { data } = await axiosInstance.get("/organizer/events");
+        console.log("Backend response:", data);
+        setMyEvents(data.data.events);
+      }
+      catch (err) {
+        console.error("Error get event:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchOrganizerEvents()
+  }, []);
+
+
 
   // Mock organizer data
   const stats = [
@@ -54,6 +78,11 @@ const OrganizerDashboard = () => {
     { id: 'settings', label: 'Settings' },
   ];
 
+  if(loading){
+    return (
+      <Loader/>
+    )
+  }
   return (
     <div className="min-h-screen bg-gray-50 pt-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -173,11 +202,11 @@ const OrganizerDashboard = () => {
                 </div>
 
                 <div className="space-y-4">
-                  {recentEvents.map((event) => (
+                  {myEvents.map((event) => (
                     <div key={event.id} className="border border-gray-200 rounded-xl p-6">
                       <div className="flex flex-col lg:flex-row gap-6">
                         <img
-                          src={event.image}
+                          src={event.images[0]}
                           alt={event.title}
                           className="w-full lg:w-48 h-32 object-cover rounded-lg"
                         />

@@ -15,8 +15,6 @@ const router = express.Router();
 router.get("/", getEvents);
 router.get("/categories", getCategories);
 router.get("/:id", getEventById);
-
-
 router.post("/",protect,organizerOnly, upload.array("images"), createEvent);
 router.put("/:id", protect,organizerOnly,upload.array("images"), updateEvent);
 

@@ -1,18 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useSearchParams } from 'react-router-dom';
-import { Filter, MapPin, Calendar, Grid, Map } from 'lucide-react';
-import { fetchEvents, setFilters } from '../store/slices/eventsSlice';
+import { Filter, MapPin, Grid, Map } from 'lucide-react';
 import EventCard from '../components/events/EventCard';
 import FilterSidebar from '../components/events/FilterSidebar';
+import { setFilters } from '../store/slices/eventsSlice';
+
 
 const EventDiscovery = () => {
   const dispatch = useDispatch();
   const [searchParams] = useSearchParams();
+  const { events, filters } = useSelector(state => state.events);
   const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'map'
   const [showFilters, setShowFilters] = useState(false);
-  
-  const { events, isLoading, filters } = useSelector(state => state.events);
+  const [isLoading,setLoading]=useState(false)
+  console.log("events",events);
 
   useEffect(() => {
     // Apply URL parameters to filters
@@ -26,8 +28,27 @@ const EventDiscovery = () => {
       }));
     }
     
-    dispatch(fetchEvents(filters));
+    // dispatch(fetchEvents(filters));
   }, [dispatch, searchParams]);
+
+
+const filteredEvents = events.filter(event => {
+  // Category filter
+  if (filters.category !== 'All' && event.category !== filters.category) return false;
+
+  // Price filter
+  const [minPrice, maxPrice] = filters.priceRange;
+  if (event.price < minPrice || event.price > maxPrice) return false;
+
+  // Search filter
+  if (filters.search && !event.title.toLowerCase().includes(filters.search.toLowerCase())) return false;
+
+  // Location filter
+  if (filters.location && !event.location.toLowerCase().includes(filters.location.toLowerCase())) return false;
+
+  return true;
+});
+
 
   const sortOptions = [
     { value: 'date', label: 'Date' },
@@ -96,7 +117,7 @@ const EventDiscovery = () => {
                 {/* Results Count */}
                 <div className="flex items-center justify-between">
                   <p className="text-gray-600">
-                    {events.length} events found
+                    {filteredEvents.length} events found
                   </p>
                 </div>
 
@@ -116,8 +137,8 @@ const EventDiscovery = () => {
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                    {events.map((event) => (
-                      <EventCard key={event.id} event={event} />
+                    {filteredEvents?.map((event) => (
+                      <EventCard key={event._id} event={event} />
                     ))}
                   </div>
                 )}

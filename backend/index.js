@@ -7,6 +7,9 @@ const connectDB = require('./config/db');
 // Route imports
 const userRoutes = require('./routes/userRoutes');
 const oAuth = require('./routes/oAuth');
+const eventsRoute = require('./routes/eventRoutes');
+const organizerRoute = require('./routes/organizerRoutes');
+
 const app = express();
 
 
@@ -18,6 +21,8 @@ connectDB()
 // API Routes
 app.use('/api/users',userRoutes );
 app.use('/api/oauth',oAuth );
+app.use('/api/events',eventsRoute );
+app.use('/api/organizer',organizerRoute );
 
 // Root route
 app.get('/', (req, res) => {

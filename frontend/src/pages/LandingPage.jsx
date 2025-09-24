@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { Search, ArrowRight, Star, Users, Calendar, MapPin, Sparkles } from 'lucide-react';
-import { fetchEvents } from '../store/slices/eventsSlice';
+// import { fetchEvents } from '../store/slices/eventsSlice';
 import { setSearchQuery } from '../store/slices/uiSlice';
 import EventCard from '../components/events/EventCard';
 import CategoryGrid from '../components/events/CategoryGrid';
@@ -11,11 +11,12 @@ const LandingPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { featuredEvents, categories } = useSelector(state => state.events);
+    const { events } = useSelector(state => state.events);
+
   const { searchQuery } = useSelector(state => state.ui);
 
   useEffect(() => {
-    dispatch(fetchEvents());
-  }, [dispatch]);
+  }, [events]);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -116,8 +117,8 @@ const LandingPage = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {featuredEvents.slice(0, 6).map((event) => (
-            <EventCard key={event.id} event={event} />
+          {events.slice(0, 6).map((event) => (
+            <EventCard key={event._id} event={event} />
           ))}
         </div>
 

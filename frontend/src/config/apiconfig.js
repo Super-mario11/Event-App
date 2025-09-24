@@ -1,20 +1,23 @@
-import axios from 'axios';
+import axios from "axios";
 
-// Create axios instance with base configuration
-const apiClient = axios.create({
-  baseURL:  'http://localhost:3001/api',
-  timeout: 10000,
+// const apiUrl = import.meta.env.VITE_API_URL;
+const apiUrl = 'http://localhost:5000/api';
+
+const axiosInstance = axios.create({
+  baseURL: apiUrl,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
+  timeout: 30000,
 });
 
-// Request interceptor to add auth token
-apiClient.interceptors.request.use(
+axiosInstance.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('authToken');
+    const token = sessionStorage.getItem("token");
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+      config.headers["Authorization"] = `Bearer ${token}`;
+    }
+    if (import.meta.env.MODE === "development") {
     }
     return config;
   },
@@ -22,20 +25,20 @@ apiClient.interceptors.request.use(
     return Promise.reject(error);
   }
 );
-
-// Response interceptor for error handling
-apiClient.interceptors.response.use(
+// Response interceptor
+axiosInstance.interceptors.response.use(
   (response) => {
+    if (import.meta.env.MODE === "development") {
+    }
     return response;
   },
   (error) => {
-    if (error.response?.status === 401) {
-      // Handle unauthorized access
-      localStorage.removeItem('authToken');
-      window.location.href = '/login';
+    console.error("Response Error:", error);
+    if (error.response && error.response.status === 401) {
+      console.log("Unauthorized, redirecting to login...");
     }
     return Promise.reject(error);
   }
 );
 
-export default apiClient;
+export default axiosInstance;
