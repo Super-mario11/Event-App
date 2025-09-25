@@ -10,46 +10,45 @@ const razorpay = new Razorpay({
 /* POST /bookings */
 const createBooking = async (req, res) => {
   try {
+    const { userDetails, eventId, selectedTickets, totalAmount, paymentMethod } = req.body;
 
-    console.log(req.body);
-    const { userDetails, eventId, selectedTickets, totalAmount,paymentMethod } = req.body;
-
+    // Ensure event exists
     const event = await Event.findById(eventId);
     if (!event) return res.status(404).json({ success: false, message: "Event not found" });
 
-    const totalMember = selectedTickets.reduce((acc, curr) => acc + curr.quantity, 0)
-    console.log(totalMember);
+    // Calculate members
+    const totalMember = selectedTickets.reduce((acc, curr) => acc + curr.quantity, 0);
+    console.log("Total members:", totalMember);
 
-
-        const razorpayOrder = await razorpay.orders.create({
-      amount: totalAmount * 100,
+    // Create Razorpay order
+    const razorpayOrder = await razorpay.orders.create({
+      amount: totalAmount * 100, // paise
       currency: "INR",
       receipt: `receipt_${Date.now()}`,
     });
 
+    // Create booking in DB
     const booking = await Booking.create({
       eventId,
       userId: req.user.id,
       tickets: selectedTickets,
       totalAmount,
       attendeeInfo: userDetails,
-      paymentMethod: paymentMethod ? paymentMethod : "upi",
-      razorpayOrderId:razorpayOrder.id,
-      qrCode: "",
+      paymentMethod: paymentMethod || "upi",
+      razorpayOrderId: razorpayOrder.id,
       status: "created",
-      // qrCode: generateQR(`BK${Date.now()}:""`),
     });
 
     res.status(201).json({
       success: true,
       message: "Booking created successfully",
       data: booking,
-      razorpayOrder
+      razorpayOrder,
     });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
   }
-}
+};
 
 /* GET /bookings */
 const getBookings = async (req, res) => {
@@ -58,7 +57,22 @@ const getBookings = async (req, res) => {
   if (status) filter.status = status;
   // add date filters if needed
   const bookings = await Booking.find(filter).populate("eventId");
-  res.json({ success: true, data: { bookings } });
+  const formatted = bookings.map(b => ({
+  bookingId: b.bookingId,
+  status: b.status,
+  totalPaid: b.totalAmount,
+  eventTitle: b.eventId.title,
+  eventDate: b.eventId.date,
+  eventTime: b.eventId.time,
+  venue: b.eventId.venue,
+  image: b.eventId.images[0],
+  tickets: b.tickets.map(t => ({
+    type: t.type,
+    quantity: t.quantity,
+    price: t.price
+  }))
+}));
+  res.json({ success: true, bookings:{formatted}  });
 };
 
 /* GET /bookings/:id */

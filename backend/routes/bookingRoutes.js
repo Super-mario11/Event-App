@@ -2,7 +2,7 @@ const express  =require("express");
 const router= express.Router()
 const {getBookingById,getBookings,cancelBooking,createBooking} =require("../controllers/bookingController");
 const { protect } = require("../middlewares/authMiddleware");
-const {  verifyPayment } = require("../controllers/paymentController");
+const { verifyPayment } = require("../controllers/paymentController");
 
 router.post("/",protect, createBooking);
 router.get("/", protect, getBookings);
