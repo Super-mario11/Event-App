@@ -31,21 +31,21 @@ const Checkout = () => {
   }, [dispatch, eventId]);
 
 
-  if (currentStep === 2) {
-    
-    const bookinghandler = async () => {
-      const booking = await createBooking(formData, eventId, selectedTickets, totalAmount)
-      console.log(totalAmount);
-      try {      
-        // makePayment(booking, booking.order);
-      } catch (error) {
-        console.log(error.message);
-      }
-      
-    }
-    bookinghandler()
 
+  useEffect(() => {
+  if (currentStep === 2) {
+    const bookinghandler = async () => {
+      const booking = await createBooking(formData, eventId, selectedTickets, totalAmount);
+      if (booking?.razorpayOrder) {
+        makePayment(booking.data, booking.razorpayOrder, () => {
+          // ✅ Skip payment step → move to Confirmation
+          setCurrentStep(3);
+        });
+      }
+    };
+    bookinghandler();
   }
+}, [currentStep]);
 
   const steps = [
     { id: 1, title: 'Attendee Info' },
@@ -206,66 +206,7 @@ const Checkout = () => {
                   </div>
                 )}
 
-                {currentStep === 2 && (
-                  <div className="space-y-6">
-                    <h2 className="text-xl font-semibold text-gray-900">Payment Information</h2>
-
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-3">
-                          Payment Method
-                        </label>
-                        <div className="space-y-3">
-                          {/* <BookEvent id={eventId} /> */}
-
-                        </div>
-                      </div>
-
-                      {formData.paymentMethod === 'card' && (
-                        <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                              Card Number
-                            </label>
-                            <input
-                              type="text"
-                              placeholder="1234 5678 9012 3456"
-                              className="input-field"
-                            />
-                          </div>
-                          <div className="grid grid-cols-2 gap-4">
-                            <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Expiry Date
-                              </label>
-                              <input
-                                type="text"
-                                placeholder="MM/YY"
-                                className="input-field"
-                              />
-                            </div>
-                            <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-2">
-                                CVV
-                              </label>
-                              <input
-                                type="text"
-                                placeholder="123"
-                                className="input-field"
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="flex items-center space-x-2 text-sm text-gray-600">
-                      <Lock className="w-4 h-4" />
-                      <span>Your payment information is secure and encrypted</span>
-                    </div>
-                  </div>
-                )}
-
+          
                 {currentStep === 3 && (
                   <div className="text-center space-y-6">
                     <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto">

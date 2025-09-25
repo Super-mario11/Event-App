@@ -3,7 +3,7 @@
 import axiosInstance from "../config/apiconfig";
  const RAZORPAY_KEY = import.meta.env.VITE_RAZORPAY_KEY;
 
-export  const   makePayment = (booking,razorpayOrder) => {
+export  const   makePayment = (booking,razorpayOrder,onSuccess) => {
     const options = {
       key: RAZORPAY_KEY,
       amount: razorpayOrder.amount,
@@ -23,7 +23,7 @@ export  const   makePayment = (booking,razorpayOrder) => {
           });
 
           if (verifyResponse.data.success) {
-            setOrderStatus(true);
+             if (onSuccess) onSuccess();
           } else {
             alert("Payment verification failed!");
           }
@@ -34,7 +34,7 @@ export  const   makePayment = (booking,razorpayOrder) => {
       prefill: {
         name: booking.attendeeInfo?.name,
         email: booking.attendeeInfo?.email,
-        contact: booking.attendeeInfo?.phone,
+        contact: booking.attendeeInfo?.phoneNo,
       },
       theme: { color: "#2563eb" },
     };
