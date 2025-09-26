@@ -24,7 +24,7 @@ function App() {
   const { events } = useSelector(state => state.events);
   console.log("events", events);
   useEffect(() => {
-    const fetchEvnet = async () => {
+    const fetchEvent = async () => {
       try {
         setLoading(true);
         const { data } = await axiosInstance.get("/events");
@@ -38,7 +38,7 @@ function App() {
       }
     }
 
-    fetchEvnet()
+    fetchEvent()
   }, []);
 
 
