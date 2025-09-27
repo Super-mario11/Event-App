@@ -9,7 +9,7 @@ const oAuth = require('./routes/oAuth');
 const eventsRoute = require('./routes/eventRoutes');
 const organizerRoute = require('./routes/organizerRoutes');
 const bookingRoute = require('./routes/bookingRoutes');
-
+const chatbotRoute= require('./routes/chatbotRoute')
 const app = express();
 
 
@@ -24,6 +24,7 @@ app.use('/api/oauth',oAuth );
 app.use('/api/events',eventsRoute );
 app.use('/api/organizer',organizerRoute );
 app.use('/api/booking',bookingRoute );
+app.use('/api/chatbot',chatbotRoute );
 
 // Root route
 app.get('/', (req, res) => {
