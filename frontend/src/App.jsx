@@ -16,6 +16,7 @@ import { useState } from 'react';
 import Loader from './components/Loader';
 import { setEvents } from './store/slices/eventsSlice';
 import axiosInstance from './config/apiconfig';
+import Chatbot from './components/Chatbot';
 
 function App() {
   const { user } = useSelector(state => state.auth);
@@ -56,8 +57,6 @@ function App() {
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-            <Route path="/events" element={<EventDiscovery />} />
-            <Route path="/event/:id" element={<EventDetail />} />
 
             { user?.role === "organizer" &&(
               <>
@@ -65,16 +64,18 @@ function App() {
                 <Route path="/organizer-dashboard" element={<OrganizerDashboard />} />
               </>
             )
-            }
+          }
             {user?.role === "user"&&(
               <>
+              <Route path="/events" element={<EventDiscovery />} />
+              <Route path="/event/:id" element={<EventDetail />} />
                 <Route path="/checkout/:eventId" element={<Checkout />} />
                 <Route path="/dashboard" element={<UserDashboard />} />
-                  {/* <Route path="/placedOrder/:id" element={<PlaceOrder />} /> */}
               </>
             )}
           </Routes>
         </main>
+         {user && <Chatbot />}
         <Footer />
       </div>
     </Router>
