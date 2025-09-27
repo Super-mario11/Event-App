@@ -57,25 +57,27 @@ function App() {
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/events" element={<EventDiscovery />} />
+            <Route path="/event/:id" element={<EventDetail />} />
 
-            { user?.role === "organizer" &&(
+            
+            {user?.role === "organizer" && (
               <>
                 <Route path="/create-event" element={<CreateEvent />} />
                 <Route path="/organizer-dashboard" element={<OrganizerDashboard />} />
               </>
             )
-          }
-            {user?.role === "user"&&(
+            }
+            {user?.role === "user" && (
               <>
-              <Route path="/events" element={<EventDiscovery />} />
-              <Route path="/event/:id" element={<EventDetail />} />
+
                 <Route path="/checkout/:eventId" element={<Checkout />} />
                 <Route path="/dashboard" element={<UserDashboard />} />
               </>
             )}
           </Routes>
         </main>
-         {user && <Chatbot />}
+        {user && <Chatbot />}
         <Footer />
       </div>
     </Router>
