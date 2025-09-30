@@ -141,7 +141,7 @@ const sendNewEventEmail = async ({
       });
 
     // NOTE: Replace with your actual frontend URL if deployed
-    const eventLink = `http://https://event-app.vercel.app//event/${eventId}`;
+    const eventLink = `https://event-app.vercel.app//event/${eventId}`;
 
     const mailOptions = {
       from: process.env.EMAIL,
