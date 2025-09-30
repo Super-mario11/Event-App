@@ -116,6 +116,7 @@ const createEvent = async (req, res) => {
       images: imageUrls, // all images
       price: parseFloat(data.generalPrice) || 0,
       organizer: {
+        organizer_Id: req.user.id, // <-- CRITICAL FIX: Link event to organizer
         name: req.user.name,
         avatar: req.user.avatar || "",
       },
@@ -152,7 +153,7 @@ const createEvent = async (req, res) => {
       eventTitle: event.title,
       eventDate: event.date,
     });
-    
+
     res.status(201).json({
       success: true,
       message: "Event created successfully",

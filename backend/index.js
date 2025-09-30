@@ -10,10 +10,10 @@ const eventsRoute = require('./routes/eventRoutes');
 const organizerRoute = require('./routes/organizerRoutes');
 const bookingRoute = require('./routes/bookingRoutes');
 const chatbotRoute= require('./routes/chatbotRoute')
-const app = express();
-const notificationRoutes = require("./routes/notificationRoutes");
-app.use("/api/notifications", notificationRoutes);
 
+const app = express();
+// REMOVED: const notificationRoutes = require("./routes/notificationRoutes");
+// REMOVED: app.use("/api/notifications", notificationRoutes);
 
 
 // Middleware
@@ -31,7 +31,7 @@ app.use('/api/chatbot',chatbotRoute );
 
 // Root route
 app.get('/', (req, res) => {
-res.send(' server  is running');
+res.send(' server is running');
 });
 
 // Start server
