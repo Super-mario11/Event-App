@@ -1,6 +1,7 @@
 const Event = require("../models/eventModel");
 const { uploadOnCloudinary } = require("../utils/cloudinary");
 const { sendNewEventEmail } = require("../utils/sendEmail"); // Import new email function
+const User = require("../models/userModel"); // Added for context/future bulk email capability
 
 // ✅ GET /events
 const getEvents = async (req, res) => {
@@ -116,7 +117,7 @@ const createEvent = async (req, res) => {
       images: imageUrls, // all images
       price: parseFloat(data.generalPrice) || 0,
       organizer: {
-        organizer_Id: req.user.id, // <-- CRITICAL FIX: Link event to organizer
+        organizer_Id: req.user.id, // <-- FIX: Assign organizer ID
         name: req.user.name,
         avatar: req.user.avatar || "",
       },
@@ -147,13 +148,16 @@ const createEvent = async (req, res) => {
     // Create in DB
     const event = await Event.create(newEvent);
 
-    // Send New Event Email (Mock logic: sending to organizer for demo)
+    // Send New Event Email - UPDATED with more details
     await sendNewEventEmail({
       email: req.user.email,
       eventTitle: event.title,
       eventDate: event.date,
+      eventTime: event.time, // <-- New parameter passed
+      eventVenue: event.venue, // <-- New parameter passed
+      eventId: event._id, // <-- New parameter passed
     });
-
+    
     res.status(201).json({
       success: true,
       message: "Event created successfully",
