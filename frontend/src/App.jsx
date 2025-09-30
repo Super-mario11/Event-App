@@ -17,6 +17,8 @@ import Loader from './components/Loader';
 import { setEvents } from './store/slices/eventsSlice';
 import axiosInstance from './config/apiconfig';
 import NotificationPopup from './components/NotificationPopup'; // Import new component
+import Chatbot from './components/Chatbot';
+
 
 function App() {
   const { user } = useSelector(state => state.auth);
@@ -60,22 +62,24 @@ function App() {
             <Route path="/events" element={<EventDiscovery />} />
             <Route path="/event/:id" element={<EventDetail />} />
 
-            { user?.role === "organizer" &&(
+            
+            {user?.role === "organizer" && (
               <>
                 <Route path="/create-event" element={<CreateEvent />} />
                 <Route path="/organizer-dashboard" element={<OrganizerDashboard />} />
               </>
             )
             }
-            {user?.role === "user"&&(
+            {user?.role === "user" && (
               <>
+
                 <Route path="/checkout/:eventId" element={<Checkout />} />
                 <Route path="/dashboard" element={<UserDashboard />} />
-                  {/* <Route path="/placedOrder/:id" element={<PlaceOrder />} /> */}
               </>
             )}
           </Routes>
         </main>
+        {user && <Chatbot />}
         <Footer />
                 {user && <NotificationPopup />} {/* Render the notification pop-up if user is logged in */}
 
