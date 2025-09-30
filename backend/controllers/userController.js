@@ -4,6 +4,8 @@ const bcrypt = require('bcryptjs');
 const sendOtpEmail = require("../utils/sendEmail.js")
 const {Booking} =require("../models/bookingModel.js");
 const { uploadOnCloudinary } = require('../utils/cloudinary.js');
+const Event = require("../models/eventModel"); // Ensure Event is imported
+
 
 // Generate JWT
 const generateToken = (user) => {
@@ -221,4 +223,59 @@ exports.getUserDashboard = async (req, res) => {
       upcomingBookings: bookings.slice(0, 3),
     },
   });
+};
+
+exports.getUserNotifications = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const today = new Date();
+    // Set time to start of day for accurate comparison
+    today.setHours(0, 0, 0, 0);
+
+    const oneDay = 24 * 60 * 60 * 1000;
+    const twoDaysFromNow = new Date(today.getTime() + 2 * oneDay);
+    const sevenDaysAgo = new Date(today.getTime() - 7 * oneDay);
+
+    // 1. Fetch New Events (Events created in the last 7 days)
+    const newEvents = await Event.find({ 
+      createdAt: { $gte: sevenDaysAgo },
+      date: { $gte: today } // Only upcoming new events
+    }).limit(3).select('title date category _id');
+
+    // 2. Fetch Upcoming Booked Events (Events happening in the next 1-2 days)
+    const upcomingBookings = await Booking.find({ 
+      userId,
+      status: "confirmed" 
+    }).populate({
+      path: 'eventId',
+      select: 'title date time venue images'
+    });
+
+    const upcomingAlerts = upcomingBookings.filter(booking => {
+      // Check if event is happening between today and two days from now (inclusive)
+      const eventDate = new Date(booking.eventId.date);
+      eventDate.setHours(0, 0, 0, 0); // Set to start of day for comparison
+      
+      return eventDate >= today && eventDate <= twoDaysFromNow;
+    }).map(booking => ({
+      eventTitle: booking.eventId.title,
+      eventDate: booking.eventId.date,
+      time: booking.eventId.time,
+      bookingId: booking.bookingId,
+      eventId: booking.eventId._id
+    }));
+
+
+    res.json({
+      success: true,
+      data: {
+        newEvents,
+        upcomingAlerts
+      }
+    });
+
+  } catch (err) {
+    console.error("Error fetching user notifications:", err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
 };

@@ -13,6 +13,7 @@ const EventDiscovery = () => {
   const { events, filters } = useSelector(state => state.events);
   const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'map'
   const [showFilters, setShowFilters] = useState(false);
+  
   const [isLoading,setLoading]=useState(false)
   console.log("events",events);
 

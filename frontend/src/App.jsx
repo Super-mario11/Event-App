@@ -16,6 +16,7 @@ import { useState } from 'react';
 import Loader from './components/Loader';
 import { setEvents } from './store/slices/eventsSlice';
 import axiosInstance from './config/apiconfig';
+import NotificationPopup from './components/NotificationPopup'; // Import new component
 
 function App() {
   const { user } = useSelector(state => state.auth);
@@ -76,6 +77,8 @@ function App() {
           </Routes>
         </main>
         <Footer />
+                {user && <NotificationPopup />} {/* Render the notification pop-up if user is logged in */}
+
       </div>
     </Router>
   );

@@ -4,6 +4,8 @@ import { useDispatch } from "react-redux";
 import { Mail, Lock, Eye, EyeOff, Calendar } from "lucide-react";
 import axiosInstance from "../config/apiconfig";
 import { login } from "../store/slices/authSlice";
+import { setShowLoginNotification, setNotificationData } from "../store/slices/uiSlice"; // Import new actions
+
 
 const Login = () => {
   const dispatch = useDispatch();
@@ -25,6 +27,22 @@ const Login = () => {
     });
   };
 
+   const fetchAndShowNotifications = async () => {
+    try {
+        // Fetch user-specific notifications
+        const { data } = await axiosInstance.get("/users/notifications");
+        const { newEvents, upcomingAlerts } = data.data;
+
+        if (newEvents.length > 0 || upcomingAlerts.length > 0) {
+            dispatch(setNotificationData({ newEvents, upcomingAlerts }));
+            dispatch(setShowLoginNotification(true));
+        }
+    } catch (err) {
+        console.error("Error fetching notifications:", err);
+        // Do not block login, just log the error
+    }
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -40,6 +58,9 @@ const Login = () => {
 
       // Dispatch to redux store
       dispatch(login({ user: response.data.user }));
+
+       // Fetch and show notifications AFTER successful login (New Step)
+      await fetchAndShowNotifications();
 
       // Navigate to home or dashboard
       navigate("/");

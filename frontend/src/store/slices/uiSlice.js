@@ -1,3 +1,5 @@
+// Event-App/frontend/src/store/slices/uiSlice.js
+
 import { createSlice } from '@reduxjs/toolkit';
 
 const uiSlice = createSlice({
@@ -7,6 +9,11 @@ const uiSlice = createSlice({
     activeModal: null,
     toast: null,
     searchQuery: '',
+    showLoginNotification: false, // New state for login pop-up
+    notificationData: {          // New state for notification content
+      newEvents: [],
+      upcomingAlerts: []
+    }
   },
   reducers: {
     toggleMobileMenu: (state) => {
@@ -30,6 +37,12 @@ const uiSlice = createSlice({
     setSearchQuery: (state, action) => {
       state.searchQuery = action.payload;
     },
+    setShowLoginNotification: (state, action) => {
+        state.showLoginNotification = action.payload;
+    },
+    setNotificationData: (state, action) => {
+        state.notificationData = action.payload;
+    }
   },
 });
 
@@ -40,7 +53,9 @@ export const {
   closeModal, 
   showToast, 
   hideToast,
-  setSearchQuery 
+  setSearchQuery,
+  setShowLoginNotification,
+  setNotificationData 
 } = uiSlice.actions;
 
 export default uiSlice.reducer;

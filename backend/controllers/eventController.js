@@ -1,5 +1,6 @@
-const Event = require('../models/eventModel'); 
+const Event = require("../models/eventModel");
 const { uploadOnCloudinary } = require("../utils/cloudinary");
+const { sendNewEventEmail } = require("../utils/sendEmail"); // Import new email function
 
 // ✅ GET /events
 const getEvents = async (req, res) => {
@@ -37,13 +38,12 @@ const getEvents = async (req, res) => {
       if (priceMax) filter.price.$lte = Number(priceMax);
     }
 
-    const sortOptions =
-      {
-        date: { date: 1 },
-        price: { price: 1 },
-        rating: { rating: -1 },
-        popular: { attendees: -1 },
-      }[sortBy] || { createdAt: -1 };
+    const sortOptions = {
+      date: { date: 1 },
+      price: { price: 1 },
+      rating: { rating: -1 },
+      popular: { attendees: -1 },
+    }[sortBy] || { createdAt: -1 };
 
     const skip = (page - 1) * limit;
 
@@ -104,7 +104,7 @@ const createEvent = async (req, res) => {
     if (typeof req.body.eventData === "string") {
       data = JSON.parse(req.body.eventData);
     }
-console.log(data);
+    console.log(data);
     // Explicitly map fields
     const newEvent = {
       title: data.title,
@@ -113,51 +113,56 @@ console.log(data);
       date: data.date,
       time: data.time,
       venue: data.location || data.venue, // your schema uses 'venue'
-      images: imageUrls,                  // all images
+      images: imageUrls, // all images
       price: parseFloat(data.generalPrice) || 0,
       organizer: {
         name: req.user.name,
-        avatar: req.user.avatar || ""
+        avatar: req.user.avatar || "",
       },
       tickets: [],
       featured: data.featured || false,
-      attendees:data.attendees|| 0,
-      rating: 0
+      attendees: data.attendees || 0,
+      rating: 0,
     };
 
- if (data.generalPrice && parseFloat(data.generalPrice) > 0) {
-  newEvent.tickets.push({
-    type: "General Admission",
-    price: parseFloat(data.generalPrice),
-    quantity: parseInt(data.generalQuantity) || 100,
-    sold: 0
-  });
-}
+    if (data.generalPrice && parseFloat(data.generalPrice) > 0) {
+      newEvent.tickets.push({
+        type: "General Admission",
+        price: parseFloat(data.generalPrice),
+        quantity: parseInt(data.generalQuantity) || 100,
+        sold: 0,
+      });
+    }
 
-if (data.vipPrice && parseFloat(data.vipPrice) > 0) {
-  newEvent.tickets.push({
-    type: "VIP",
-    price: parseFloat(data.vipPrice),
-    quantity: parseInt(data.vipQuantity) || 50,
-    sold: 0
-  });
-}
+    if (data.vipPrice && parseFloat(data.vipPrice) > 0) {
+      newEvent.tickets.push({
+        type: "VIP",
+        price: parseFloat(data.vipPrice),
+        quantity: parseInt(data.vipQuantity) || 50,
+        sold: 0,
+      });
+    }
 
     // Create in DB
     const event = await Event.create(newEvent);
 
+    // Send New Event Email (Mock logic: sending to organizer for demo)
+    await sendNewEventEmail({
+      email: req.user.email,
+      eventTitle: event.title,
+      eventDate: event.date,
+    });
+    
     res.status(201).json({
       success: true,
       message: "Event created successfully",
-      data: event
+      data: event,
     });
-
   } catch (error) {
     console.error("Error creating event:", error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
-
 
 // ✅ PUT /events/:id
 const updateEvent = async (req, res) => {

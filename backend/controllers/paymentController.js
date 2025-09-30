@@ -4,6 +4,8 @@ const crypto = require("crypto");
 const Booking = require("../models/bookingModel");
 const Event = require("../models/eventModel");
 
+const { sendBookingConfirmationEmail } = require("../utils/sendEmail"); // Import new email function
+
 exports.verifyPayment = async (req, res, next) => {
   const session = await mongoose.startSession();
   try {
@@ -16,7 +18,9 @@ exports.verifyPayment = async (req, res, next) => {
       .digest("hex");
 
     if (generatedSignature !== signature) {
-      return res.status(400).json({ success: false, message: "Payment verification failed" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Payment verification failed" });
     }
 
     // 2) start transaction
@@ -27,14 +31,20 @@ exports.verifyPayment = async (req, res, next) => {
     if (!booking) {
       await session.abortTransaction();
       session.endSession();
-      return res.status(404).json({ success: false, message: "Booking not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Booking not found" });
     }
 
     // idempotency: if already confirmed, return success
     if (booking.status === "confirmed") {
       await session.commitTransaction();
       session.endSession();
-      return res.json({ success: true, message: "Booking already confirmed", booking });
+      return res.json({
+        success: true,
+        message: "Booking already confirmed",
+        booking,
+      });
     }
 
     // 4) find event
@@ -42,7 +52,9 @@ exports.verifyPayment = async (req, res, next) => {
     if (!event) {
       await session.abortTransaction();
       session.endSession();
-      return res.status(404).json({ success: false, message: "Event not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Event not found" });
     }
 
     // 5) update event tickets and attendees
@@ -95,7 +107,22 @@ exports.verifyPayment = async (req, res, next) => {
     await session.commitTransaction();
     session.endSession();
 
-    return res.json({ success: true, message: "Payment verified & booking confirmed", booking });
+    // 9) Send Confirmation Email (New Step)
+    await sendBookingConfirmationEmail({
+      email: booking.attendeeInfo.email,
+      name: booking.attendeeInfo.name,
+      bookingId: booking.bookingId,
+      eventTitle: event.title,
+      date: event.date,
+      totalAmount: booking.totalAmount,
+      tickets: booking.tickets,
+    });
+
+    return res.json({
+      success: true,
+      message: "Payment verified & booking confirmed",
+      booking,
+    });
   } catch (err) {
     // rollback and rethrow
     try {

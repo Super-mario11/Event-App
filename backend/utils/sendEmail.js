@@ -1,3 +1,4 @@
+// Event-App/backend/utils/sendEmail.js
 
 const nodemailer = require("nodemailer");
 
@@ -47,4 +48,61 @@ const sendStatusUpdateEmail = async ({ email, subject, status }) => {
   await transporter.sendMail(mailOptions);
 };
 
-module.exports = { sendOtpEmail,sendStatusUpdateEmail };
+const sendBookingConfirmationEmail = async ({ email, name, bookingId, eventTitle, date, totalAmount, tickets }) => {
+  const formatDate = (dateString) => new Date(dateString).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  const ticketList = tickets.map(t => `<li>${t.type} x ${t.quantity} - ₹${t.price * t.quantity}</li>`).join('');
+
+  const mailOptions = {
+    from: process.env.EMAIL,
+    to: email,
+    subject: `✅ Booking Confirmed for ${eventTitle}`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;">
+        <h2 style="color: #10b981;">Booking Confirmed!</h2>
+        <p>Hello ${name},</p>
+        <p>Thank you for booking with EventHive. Your booking for the event is now confirmed.</p>
+        
+        <h3 style="color: #3b82f6;">Event Details</h3>
+        <p><strong>Event:</strong> ${eventTitle}</p>
+        <p><strong>Date:</strong> ${formatDate(date)}</p>
+        <p><strong>Booking ID:</strong> ${bookingId}</p>
+
+        <h3 style="color: #3b82f6;">Tickets & Receipt</h3>
+        <ul style="list-style-type: none; padding: 0;">
+          ${ticketList}
+        </ul>
+        <p style="font-size: 1.2em; font-weight: bold; margin-top: 15px;">Total Paid: ₹${totalAmount}</p>
+
+        <p>We look forward to seeing you there!</p>
+      </div>
+    `
+  };
+
+  await transporter.sendMail(mailOptions);
+};
+
+const sendNewEventEmail = async ({ email, eventTitle, eventDate }) => {
+  const formatDate = (dateString) => new Date(dateString).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+  const mailOptions = {
+    from: process.env.EMAIL,
+    to: email,
+    subject: `✨ New Event Added: ${eventTitle}`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;">
+        <h2 style="color: #f97316;">Exciting News!</h2>
+        <p>A new event has been added that might interest you:</p>
+        
+        <h3 style="color: #3b82f6;">${eventTitle}</h3>
+        <p><strong>Date:</strong> ${formatDate(eventDate)}</p>
+        
+        <p>Check it out and grab your tickets now!</p>
+      </div>
+    `
+  };
+
+  await transporter.sendMail(mailOptions);
+};
+
+
+module.exports = { sendOtpEmail, sendStatusUpdateEmail, sendBookingConfirmationEmail, sendNewEventEmail };

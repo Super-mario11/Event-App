@@ -18,8 +18,8 @@ const EventCard = ({ event }) => {
         {/* Image */}
         <div className="relative overflow-hidden">
           <img
-            src={event.images[0]}
-            alt={event.title}
+            src={event?.images?.[0]}
+            alt={event?.title || 'Event Image'}
             className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
           />
           <div className="absolute top-4 left-4">
