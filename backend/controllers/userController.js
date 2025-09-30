@@ -4,8 +4,10 @@ const bcrypt = require('bcryptjs');
 const sendOtpEmail = require("../utils/sendEmail.js")
 const {Booking} =require("../models/bookingModel.js");
 const { uploadOnCloudinary } = require('../utils/cloudinary.js');
-const Event = require("../models/eventModel"); // Ensure Event is imported
+const Event = require("../models/eventModel.js"); // Ensure Event is imported
+const Notification = require('../models/NotificationModel');
 
+console.log("Is Event Model defined?", Event); // ADD THIS LINE
 
 // Generate JWT
 const generateToken = (user) => {

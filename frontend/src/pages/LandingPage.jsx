@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { Search, ArrowRight, Star, Users, Calendar, MapPin, Sparkles } from 'lucide-react';
@@ -10,13 +10,8 @@ import CategoryGrid from '../components/events/CategoryGrid';
 const LandingPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { featuredEvents, categories } = useSelector(state => state.events);
-    const { events } = useSelector(state => state.events);
-
+  const { categories, events } = useSelector(state => state.events);
   const { searchQuery } = useSelector(state => state.ui);
-
-  useEffect(() => {
-  }, [events]);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -117,8 +112,8 @@ const LandingPage = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {events.slice(0, 6).map((event) => (
-            <EventCard key={event._id || event._id || index} event={event} />
+          {events.slice(0, 6).map((event, index) => (
+            <EventCard key={event._id || index} event={event} />
           ))}
         </div>
 
@@ -152,7 +147,10 @@ const LandingPage = () => {
           <p className="text-xl text-primary-100 mb-8 leading-relaxed">
             Join thousands of organizers who trust EventHive to manage their events seamlessly
           </p>
-          <Link to="/create-event" className="inline-flex items-center space-x-2 bg-white text-primary-600 font-semibold px-8 py-4 rounded-xl hover:bg-gray-50 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+          <Link
+            to="/create-event"
+            className="inline-flex items-center space-x-2 bg-white text-primary-600 font-semibold px-8 py-4 rounded-xl hover:bg-gray-50 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+          >
             <span>Start Creating</span>
             <ArrowRight className="w-5 h-5" />
           </Link>

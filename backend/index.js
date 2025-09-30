@@ -11,6 +11,9 @@ const organizerRoute = require('./routes/organizerRoutes');
 const bookingRoute = require('./routes/bookingRoutes');
 const chatbotRoute= require('./routes/chatbotRoute')
 const app = express();
+const notificationRoutes = require("./routes/notificationRoutes");
+app.use("/api/notifications", notificationRoutes);
+
 
 
 // Middleware
