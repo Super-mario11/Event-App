@@ -11,6 +11,7 @@ import EditProfile from '../components/EditProfile';
 const OrganizerDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [loading, setLoading] = useState(false);
+<<<<<<< HEAD
   const [stats, setStats] = useState({});
   const [recentBookings, setRecentBookings] = useState([]);
   const [allOrganizerEvents, setAllOrganizerEvents] = useState([]);
@@ -140,6 +141,51 @@ const OrganizerDashboard = () => {
   const statCards = [
     { label: 'Total Events', value: stats.totalEvents || 0, icon: Calendar, color: 'primary' },
     { label: 'Total Revenue', value: `₹${stats.totalRevenue || 0}`, icon: DollarSign, color: 'green' },
+=======
+  const [myEvents, setMyEvents] = useState([]);
+  const [bookings, setBookings] = useState([]);
+  const [stats, setStats] = useState({});
+
+  useEffect(() => {
+    const getDashboard = async () => {
+      try {
+        setLoading(true);
+        const { data } = await axiosInstance.get("/organizer/dashboard");
+
+        // Enrich recentEvents with ticketsSold, revenue, etc.
+        const enrichedEvents = data.data.recentEvents.map((event) => {
+          const eventBookings = data.data.recentBookings.filter(
+            (b) => b.eventId === event._id
+          );
+          const ticketsSold = eventBookings.reduce((sum, b) => sum + (b.quantity || 0), 0);
+          const totalTickets = event.totalTickets || 100; // fallback default
+          const revenue = eventBookings.reduce((sum, b) => sum + (b.totalPrice || 0), 0);
+          return {
+            ...event,
+            ticketsSold,
+            totalTickets,
+            revenue,
+            status: event.status || "Draft",
+          };
+        });
+
+        setMyEvents(enrichedEvents);
+        setBookings(data.data.recentBookings);
+        setStats(data.data.stats);
+      } catch (err) {
+        console.error("Error fetching dashboard:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    getDashboard();
+  }, []);
+
+  const statCards = [
+    { label: 'Total Events', value: stats.totalEvents || 0, icon: Calendar, color: 'primary' },
+    { label: 'Total Revenue', value: `$${stats.totalRevenue || 0}`, icon: DollarSign, color: 'green' },
+>>>>>>> bd6794f7826b0140cc10a2df8ff03ed5923a125c
     { label: 'Tickets Sold', value: stats.ticketsSold || 0, icon: Users, color: 'blue' },
     { label: 'Avg. Rating', value: stats.avgRating || 0, icon: TrendingUp, color: 'accent' },
   ];
@@ -149,7 +195,11 @@ const OrganizerDashboard = () => {
   return (
     <div className="min-h-screen bg-gray-50 pt-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<<<<<<< HEAD
         {/* Header */}
+=======
+ 
+>>>>>>> bd6794f7826b0140cc10a2df8ff03ed5923a125c
         <div className="mb-8 flex flex-col lg:flex-row lg:items-center lg:justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Organizer Dashboard</h1>
@@ -160,8 +210,12 @@ const OrganizerDashboard = () => {
             <span>Create New Event</span>
           </Link>
         </div>
+<<<<<<< HEAD
 
         {/* Stats Grid */}
+=======
+ 
+>>>>>>> bd6794f7826b0140cc10a2df8ff03ed5923a125c
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {statCards.map((stat, i) => (
             <div key={i} className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
@@ -173,6 +227,7 @@ const OrganizerDashboard = () => {
               }`}>
                 <stat.icon className="w-6 h-6" />
               </div>
+<<<<<<< HEAD
               <div className="text-2xl font-bold text-gray-900 mb-1">
                 {/* Renders Rupee symbol only for Total Revenue stat card */}
                 {stat.label === 'Total Revenue' ? (
@@ -181,17 +236,30 @@ const OrganizerDashboard = () => {
                   stat.value
                 )}
               </div>
+=======
+              <div className="text-2xl font-bold text-gray-900 mb-1">{stat.value}</div>
+>>>>>>> bd6794f7826b0140cc10a2df8ff03ed5923a125c
               <div className="text-sm text-gray-600">{stat.label}</div>
             </div>
           ))}
         </div>
+<<<<<<< HEAD
 
         {/* Tabs */}
+=======
+ 
+>>>>>>> bd6794f7826b0140cc10a2df8ff03ed5923a125c
         <div className="bg-white rounded-xl shadow-sm border border-gray-100">
           <div className="border-b border-gray-200">
             <nav className="flex space-x-8 px-6">
               {['overview', 'events', 'analytics', 'settings'].map((tab) => (
+<<<<<<< HEAD
                <button
+=======
+               <>
+             
+                <button
+>>>>>>> bd6794f7826b0140cc10a2df8ff03ed5923a125c
                   key={tab}
                   onClick={() => setActiveTab(tab)}
                   className={`py-4 flex border-b-2 font-medium text-sm transition-colors ${
@@ -204,7 +272,13 @@ const OrganizerDashboard = () => {
                             <Settings className="w-10 h-5 text-primary-600" />
                )}
                   {tab.charAt(0).toUpperCase() + tab.slice(1)}
+<<<<<<< HEAD
                 </button>
+=======
+                
+                </button>
+               </>
+>>>>>>> bd6794f7826b0140cc10a2df8ff03ed5923a125c
               ))}
             </nav>
           </div>
@@ -220,13 +294,18 @@ const OrganizerDashboard = () => {
                       <div className="text-sm text-gray-600">Start planning your next event</div>
                     </div>
                   </Link>
+<<<<<<< HEAD
                   <button onClick={() => setActiveTab('analytics')} className="flex items-center space-x-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+=======
+                  <button className="flex items-center space-x-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+>>>>>>> bd6794f7826b0140cc10a2df8ff03ed5923a125c
                     <BarChart3 className="w-8 h-8 text-green-600" />
                     <div>
                       <div className="font-medium text-gray-900">View Analytics</div>
                       <div className="text-sm text-gray-600">Check your performance</div>
                     </div>
                   </button>
+<<<<<<< HEAD
                   
                   {/* --- WIRED EXPORT DATA BUTTON --- */}
                   <button onClick={handleExportData} className="flex items-center space-x-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors" disabled={loading}>
@@ -254,11 +333,22 @@ const OrganizerDashboard = () => {
                         <p className="text-gray-500">No recent bookings found.</p>
                     )}
                 </div>
+=======
+                  <button className="flex items-center space-x-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                    <Download className="w-8 h-8 text-blue-600" />
+                    <div>
+                      <div className="font-medium text-gray-900">Export Data</div>
+                      <div className="text-sm text-gray-600">Download reports</div>
+                    </div>
+                  </button>
+                </div>
+>>>>>>> bd6794f7826b0140cc10a2df8ff03ed5923a125c
               </div>
             )}
 
             {activeTab === 'events' && (
               <div className="space-y-6">
+<<<<<<< HEAD
                 <div className="flex justify-between items-center mb-4">
                     <h3 className="text-xl font-semibold text-gray-900">All My Events ({allOrganizerEvents.length})</h3>
                     {/* Event Status Filter */}
@@ -356,10 +446,74 @@ const OrganizerDashboard = () => {
                       </div>
                     ))
                 )}
+=======
+                {myEvents.map((event) => (
+                  <div key={event._id} className="border border-gray-200 rounded-xl p-6">
+                    <div className="flex flex-col lg:flex-row gap-6">
+                      <img
+                        src={event?.images?.[0] || ''}
+                        alt={event.title}
+                        className="w-full lg:w-48 h-32 object-cover rounded-lg"
+                      />
+                      <div className="flex-1">
+                        <div className="flex items-start justify-between mb-4">
+                          <div>
+                            <h4 className="text-xl font-semibold text-gray-900">{event.title}</h4>
+                            <p className="text-gray-600">{event.date?.slice(0,10)}</p>
+                            <p className="text-gray-600">{event.date?.slice(11,16)}</p>
+                          </div>
+                          <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                              event.status === 'Published' 
+                                ? 'bg-green-100 text-green-800' 
+                                : 'bg-yellow-100 text-yellow-800'
+                          }`}>
+                            {event.status}
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+                          <div>
+                            <div className="text-sm text-gray-500">Tickets Sold</div>
+                            <div className="font-semibold text-gray-900">
+                              {event.ticketsSold}/{event.totalTickets}
+                            </div>
+                          </div>
+                          <div>
+                            <div className="text-sm text-gray-500">Revenue</div>
+                            <div className="font-semibold text-gray-900">${event.revenue}</div>
+                          </div>
+                          <div>
+                            <div className="text-sm text-gray-500">Completion</div>
+                            <div className="font-semibold text-gray-900">
+                              {event.totalTickets > 0 
+                                ? Math.round((event.ticketsSold / event.totalTickets) * 100)
+                                : 0}%
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          <Link to={`/event/${event._id}`} className="flex items-center space-x-1 px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200">
+                            <Eye className="w-4 h-4" />
+                            <span>View</span>
+                          </Link>
+                          <button className="flex items-center space-x-1 px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200">
+                            <Edit className="w-4 h-4" />
+                            <span>Edit</span>
+                          </button>
+                          <button className="flex items-center space-x-1 px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200">
+                            <BarChart3 className="w-4 h-4" />
+                            <span>Analytics</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+>>>>>>> bd6794f7826b0140cc10a2df8ff03ed5923a125c
               </div>
             )}
 
             {activeTab === 'analytics' && (
+<<<<<<< HEAD
               <div className="space-y-8">
                 <h3 className="text-2xl font-bold text-gray-900 mb-4">Overall Event Analytics</h3>
                 
@@ -403,6 +557,12 @@ const OrganizerDashboard = () => {
                         </ul>
                     </div>
                 </div>
+=======
+              <div className="text-center py-12">
+                <BarChart3 className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">Analytics Dashboard</h3>
+                <p className="text-gray-600">Detailed analytics and reports coming soon</p>
+>>>>>>> bd6794f7826b0140cc10a2df8ff03ed5923a125c
               </div>
             )}
 
@@ -418,4 +578,14 @@ const OrganizerDashboard = () => {
   );
 };
 
+<<<<<<< HEAD
 export default OrganizerDashboard;
+=======
+export default OrganizerDashboard;
+*/}
+
+
+
+
+ 
+>>>>>>> bd6794f7826b0140cc10a2df8ff03ed5923a125c

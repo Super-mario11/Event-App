@@ -24,6 +24,10 @@
     "mongoose": "^8.18.1",
     "multer": "^2.0.2",
     "nodemailer": "^7.0.6",
+<<<<<<< HEAD
+=======
+    "qrcode": "^1.5.4",
+>>>>>>> bd6794f7826b0140cc10a2df8ff03ed5923a125c
     "razorpay": "^2.9.6"
   },
   "devDependencies": {
