@@ -2,19 +2,11 @@ const User = require('../models/userModel');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const sendOtpEmail = require("../utils/sendEmail.js")
-<<<<<<< HEAD
 const Booking = require("../models/bookingModel.js");
-=======
-const {Booking} =require("../models/bookingModel.js");
->>>>>>> bd6794f7826b0140cc10a2df8ff03ed5923a125c
 const { uploadOnCloudinary } = require('../utils/cloudinary.js');
 const Event = require("../models/eventModel.js"); // Ensure Event is imported
 const Notification = require('../models/NotificationModel');
 
-<<<<<<< HEAD
-=======
-console.log("Is Event Model defined?", Event); // ADD THIS LINE
->>>>>>> bd6794f7826b0140cc10a2df8ff03ed5923a125c
 
 // Generate JWT
 const generateToken = (user) => {
@@ -45,11 +37,7 @@ exports.registerUser = async (req, res) => {
       role,
       phoneNo,
     });
-<<<<<<< HEAD
       await newUser.save();
-=======
-     await newUser.save();
->>>>>>> bd6794f7826b0140cc10a2df8ff03ed5923a125c
 
     res.status(201).json({ message: 'User created successfully',newUser });
 
@@ -246,11 +234,7 @@ exports.getUserNotifications = async (req, res) => {
     today.setHours(0, 0, 0, 0);
 
     const oneDay = 24 * 60 * 60 * 1000;
-<<<<<<< HEAD
     const thirtyDaysFromNow = new Date(today.getTime() + 30 * oneDay); // <-- CHANGED TO 30 DAYS
-=======
-    const twoDaysFromNow = new Date(today.getTime() + 2 * oneDay);
->>>>>>> bd6794f7826b0140cc10a2df8ff03ed5923a125c
     const sevenDaysAgo = new Date(today.getTime() - 7 * oneDay);
 
     // 1. Fetch New Events (Events created in the last 7 days)
@@ -259,11 +243,7 @@ exports.getUserNotifications = async (req, res) => {
       date: { $gte: today } // Only upcoming new events
     }).limit(3).select('title date category _id');
 
-<<<<<<< HEAD
     // 2. Fetch Upcoming Booked Events (Events happening in the next 30 days)
-=======
-    // 2. Fetch Upcoming Booked Events (Events happening in the next 1-2 days)
->>>>>>> bd6794f7826b0140cc10a2df8ff03ed5923a125c
     const upcomingBookings = await Booking.find({ 
       userId,
       status: "confirmed" 
@@ -273,19 +253,11 @@ exports.getUserNotifications = async (req, res) => {
     });
 
     const upcomingAlerts = upcomingBookings.filter(booking => {
-<<<<<<< HEAD
       // Check if event is happening between today and thirty days from now (inclusive)
       const eventDate = new Date(booking.eventId.date);
       eventDate.setHours(0, 0, 0, 0); // Set to start of day for comparison
       
       return eventDate >= today && eventDate <= thirtyDaysFromNow; // <-- Filter uses 30 days
-=======
-      // Check if event is happening between today and two days from now (inclusive)
-      const eventDate = new Date(booking.eventId.date);
-      eventDate.setHours(0, 0, 0, 0); // Set to start of day for comparison
-      
-      return eventDate >= today && eventDate <= twoDaysFromNow;
->>>>>>> bd6794f7826b0140cc10a2df8ff03ed5923a125c
     }).map(booking => ({
       eventTitle: booking.eventId.title,
       eventDate: booking.eventId.date,

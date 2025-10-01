@@ -1,15 +1,11 @@
 const Event = require("../models/eventModel");
 const { uploadOnCloudinary } = require("../utils/cloudinary");
-<<<<<<< HEAD
 const { sendNewEventEmail } = require("../utils/sendEmail");
 const User = require("../models/userModel"); // Ensure User model is imported
 const Booking = require('../models/bookingModel'); // Needed for future features/checks
 
 // Generate JWT (Assuming this is defined elsewhere or in userController, keeping minimal imports)
 // Note: Keeping this file focused on CRUD operations.
-=======
-const { sendNewEventEmail } = require("../utils/sendEmail"); // Import new email function
->>>>>>> bd6794f7826b0140cc10a2df8ff03ed5923a125c
 
 // ✅ GET /events
 const getEvents = async (req, res) => {
@@ -82,14 +78,10 @@ const getEvents = async (req, res) => {
 // ✅ GET /events/:id
 const getEventById = async (req, res) => {
   try {
-<<<<<<< HEAD
     // Populate organizer details for the frontend EventDetail page
     const event = await Event.findById(req.params.id)
       .populate('organizer.organizer_Id', 'name avatar email'); 
       
-=======
-    const event = await Event.findById(req.params.id);
->>>>>>> bd6794f7826b0140cc10a2df8ff03ed5923a125c
     if (!event)
       return res
         .status(404)
@@ -101,17 +93,9 @@ const getEventById = async (req, res) => {
   }
 };
 
-<<<<<<< HEAD
 
 const createEvent = async (req, res) => {
   try {
-=======
-const createEvent = async (req, res) => {
-  try {
-    console.log("User:", req.user);
-
-    // Upload images
->>>>>>> bd6794f7826b0140cc10a2df8ff03ed5923a125c
     let imageUrls = [];
     if (req.files?.length > 0) {
       for (const file of req.files) {
@@ -120,40 +104,22 @@ const createEvent = async (req, res) => {
       }
     }
 
-<<<<<<< HEAD
     let data = req.body;
     if (typeof req.body.eventData === "string") {
       data = JSON.parse(req.body.eventData);
     }
 
-=======
-    // Parse form-data JSON
-    let data = req.body;
-
-    if (typeof req.body.eventData === "string") {
-      data = JSON.parse(req.body.eventData);
-    }
-    console.log(data);
-    // Explicitly map fields
->>>>>>> bd6794f7826b0140cc10a2df8ff03ed5923a125c
     const newEvent = {
       title: data.title,
       description: data.description,
       category: data.category,
       date: data.date,
       time: data.time,
-<<<<<<< HEAD
       venue: data.location || data.venue,
       images: imageUrls,
       price: parseFloat(data.generalPrice) || 0,
       organizer: {
         organizer_Id: req.user.id,
-=======
-      venue: data.location || data.venue, // your schema uses 'venue'
-      images: imageUrls, // all images
-      price: parseFloat(data.generalPrice) || 0,
-      organizer: {
->>>>>>> bd6794f7826b0140cc10a2df8ff03ed5923a125c
         name: req.user.name,
         avatar: req.user.avatar || "",
       },
@@ -161,10 +127,7 @@ const createEvent = async (req, res) => {
       featured: data.featured || false,
       attendees: data.attendees || 0,
       rating: 0,
-<<<<<<< HEAD
       isDraft: data.isDraft || false, // Assuming a draft flag might be used
-=======
->>>>>>> bd6794f7826b0140cc10a2df8ff03ed5923a125c
     };
 
     if (data.generalPrice && parseFloat(data.generalPrice) > 0) {
@@ -185,26 +148,16 @@ const createEvent = async (req, res) => {
       });
     }
 
-<<<<<<< HEAD
     const event = await Event.create(newEvent);
 
     // Send New Event Email
-=======
-    // Create in DB
-    const event = await Event.create(newEvent);
-
-    // Send New Event Email (Mock logic: sending to organizer for demo)
->>>>>>> bd6794f7826b0140cc10a2df8ff03ed5923a125c
     await sendNewEventEmail({
       email: req.user.email,
       eventTitle: event.title,
       eventDate: event.date,
-<<<<<<< HEAD
       eventTime: event.time,
       eventVenue: event.venue,
       eventId: event._id,
-=======
->>>>>>> bd6794f7826b0140cc10a2df8ff03ed5923a125c
     });
     
     res.status(201).json({
@@ -218,7 +171,6 @@ const createEvent = async (req, res) => {
   }
 };
 
-<<<<<<< HEAD
 // ✅ PUT /events/:id (Updated to handle multi-step form update)
 const updateEvent = async (req, res) => {
   try {
@@ -230,18 +182,11 @@ const updateEvent = async (req, res) => {
       data = JSON.parse(req.body.eventData);
     }
 
-=======
-// ✅ PUT /events/:id
-const updateEvent = async (req, res) => {
-  try {
-    const eventId = req.params.id;
->>>>>>> bd6794f7826b0140cc10a2df8ff03ed5923a125c
     const event = await Event.findById(eventId);
     if (!event)
       return res
         .status(404)
         .json({ success: false, message: "Event not found" });
-<<<<<<< HEAD
         
     // Authorization check
     if (event.organizer.organizer_Id.toString() !== req.user.id.toString()) {
@@ -311,26 +256,6 @@ const updateEvent = async (req, res) => {
     res.json({ success: true, message: "Event updated successfully", data: updated });
   } catch (err) {
     console.error("Error updating event:", err);
-=======
-
-    let newImages = event.images;
-    if (req.files?.length > 0) {
-      newImages = [];
-      for (const file of req.files) {
-        const uploaded = await uploadOnCloudinary(file.path, "events");
-        if (uploaded?.url) newImages.push(uploaded.url);
-      }
-    }
-
-    const updated = await Event.findByIdAndUpdate(
-      eventId,
-      { ...req.body, images: newImages },
-      { new: true }
-    );
-
-    res.json({ success: true, data: updated });
-  } catch (err) {
->>>>>>> bd6794f7826b0140cc10a2df8ff03ed5923a125c
     res.status(500).json({ success: false, message: err.message });
   }
 };
@@ -338,18 +263,13 @@ const updateEvent = async (req, res) => {
 // ✅ DELETE /events/:id
 const deleteEvent = async (req, res) => {
   try {
-<<<<<<< HEAD
     const event = await Event.findById(req.params.id);
 
-=======
-    const event = await Event.findByIdAndDelete(req.params.id);
->>>>>>> bd6794f7826b0140cc10a2df8ff03ed5923a125c
     if (!event)
       return res
         .status(404)
         .json({ success: false, message: "Event not found" });
 
-<<<<<<< HEAD
     // Authorization check: only organizer can delete
     if (event.organizer.organizer_Id.toString() !== req.user.id.toString()) {
         return res.status(403).json({ success: false, message: "Not authorized to delete this event" });
@@ -357,8 +277,6 @@ const deleteEvent = async (req, res) => {
     
     await Event.deleteOne({ _id: event._id });
 
-=======
->>>>>>> bd6794f7826b0140cc10a2df8ff03ed5923a125c
     res.json({ success: true, message: "Event deleted successfully" });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -392,8 +310,4 @@ module.exports = {
   updateEvent,
   deleteEvent,
   getCategories,
-<<<<<<< HEAD
 };
-=======
-};
->>>>>>> bd6794f7826b0140cc10a2df8ff03ed5923a125c

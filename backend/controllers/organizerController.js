@@ -1,21 +1,16 @@
 const Event = require("../models/eventModel.js");
 const Booking = require("../models/bookingModel.js");
 
-<<<<<<< HEAD
 // Helper functions for date formatting (built-in JS)
 const formatDate = (date) => date ? new Date(date).toISOString().slice(0, 10) : 'N/A';
 const formatDateTime = (date) => date ? new Date(date).toISOString().replace('T', ' ').slice(0, 16) : 'N/A';
 
 
 // Get organizer dashboard stats and recent events list
-=======
-// Get organizer dashboard stats
->>>>>>> bd6794f7826b0140cc10a2df8ff03ed5923a125c
 const getDashboard = async (req, res) => {
   try {
     const organizerId = req.user.id;
 
-<<<<<<< HEAD
     // 1. Fetch all events by this organizer
     const events = await Event.find({ "organizer.organizer_Id": organizerId });
 
@@ -76,31 +71,6 @@ const getDashboard = async (req, res) => {
 
     // --- Recent bookings (for activity feed) ---
     const recentBookings = allBookings
-=======
-    // Fetch all events by this organizer
-    const events = await Event.find({ organizer: organizerId });
-
-    // Fetch all bookings for these events
-    const bookings = await Booking.find({
-      eventId: { $in: events.map((e) => e._id) },
-    });
-
-    // --- Stats calculation ---
-    const totalEvents = events.length;
-    const totalRevenue = bookings.reduce((sum, b) => sum + (b.totalPrice || 0), 0);
-    const ticketsSold = bookings.reduce((sum, b) => sum + (b.quantity || 0), 0);
-    const avgRating =
-      events.length > 0
-        ? (events.reduce((sum, e) => sum + (e.rating || 0), 0) / events.length).toFixed(1)
-        : 0;
-
-    // --- Recent events & bookings ---
-    const recentEvents = events
-      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-      .slice(0, 5);
-
-    const recentBookings = bookings
->>>>>>> bd6794f7826b0140cc10a2df8ff03ed5923a125c
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
       .slice(0, 5);
 
@@ -118,22 +88,12 @@ const getDashboard = async (req, res) => {
   }
 };
 
-<<<<<<< HEAD
 // Get all organizer events with enrichment (Used for the 'Events' tab list)
 const getOrganizerEvents = async (req, res) => {
   try {
     const { page = 1, limit = 100 } = req.query;
     const organizerId = req.user.id;
     const filter = { "organizer.organizer_Id": organizerId };
-=======
-// Get all organizer events with optional status filter & pagination
-const getOrganizerEvents = async (req, res) => {
-  try {
-    const { status, page = 1, limit = 10 } = req.query;
-    const filter = { organizer: req.user.id };
-
-    if (status) filter.status = status;
->>>>>>> bd6794f7826b0140cc10a2df8ff03ed5923a125c
 
     const skip = (page - 1) * limit;
 
@@ -142,7 +102,6 @@ const getOrganizerEvents = async (req, res) => {
       Event.countDocuments(filter),
     ]);
 
-<<<<<<< HEAD
     // Fetch ALL bookings for enrichment
     const allBookings = await Booking.find({
         eventId: { $in: events.map((e) => e._id) },
@@ -180,12 +139,6 @@ const getOrganizerEvents = async (req, res) => {
       success: true,
       data: {
         events: enrichedEvents,
-=======
-    res.json({
-      success: true,
-      data: {
-        events,
->>>>>>> bd6794f7826b0140cc10a2df8ff03ed5923a125c
         pagination: {
           currentPage: Number(page),
           totalPages: Math.ceil(total / limit),
@@ -199,7 +152,6 @@ const getOrganizerEvents = async (req, res) => {
   }
 };
 
-<<<<<<< HEAD
 // NEW FUNCTION: Export data function (Fetches and formats tabular data)
 const exportBookingData = async (req, res) => {
   try {
@@ -255,18 +207,12 @@ const exportBookingData = async (req, res) => {
   }
 };
 
-=======
->>>>>>> bd6794f7826b0140cc10a2df8ff03ed5923a125c
 // Optionally, get recent bookings for organizer
 const getOrganizerBookings = async (req, res) => {
   try {
     const organizerId = req.user.id;
 
-<<<<<<< HEAD
     const events = await Event.find({ "organizer.organizer_Id": organizerId });
-=======
-    const events = await Event.find({ organizer: organizerId });
->>>>>>> bd6794f7826b0140cc10a2df8ff03ed5923a125c
 
     const bookings = await Booking.find({
       eventId: { $in: events.map((e) => e._id) },
@@ -288,9 +234,5 @@ module.exports = {
   getDashboard,
   getOrganizerEvents,
   getOrganizerBookings,
-<<<<<<< HEAD
   exportBookingData, // Export the new function
 };
-=======
-};
->>>>>>> bd6794f7826b0140cc10a2df8ff03ed5923a125c

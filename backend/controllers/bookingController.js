@@ -2,30 +2,16 @@ const Event = require("../models/eventModel.js");
 // const generateQR =require("../utils/qr.js");
 const Booking = require("../models/bookingModel.js");
 const Razorpay = require("razorpay");
-<<<<<<< HEAD
-=======
-const jwt = require("jsonwebtoken");
-const QRCode = require("qrcode");
-const cloudinary = require("../utils/cloudinary");
-
->>>>>>> bd6794f7826b0140cc10a2df8ff03ed5923a125c
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
-<<<<<<< HEAD
 /* POST /bookings */
-=======
-/* POST /bookings */ 
- // your Cloudinary upload util
-
->>>>>>> bd6794f7826b0140cc10a2df8ff03ed5923a125c
 const createBooking = async (req, res) => {
   try {
     const { userDetails, eventId, selectedTickets, totalAmount, paymentMethod } = req.body;
 
-<<<<<<< HEAD
     // Ensure event exists
     const event = await Event.findById(eventId);
     if (!event) return res.status(404).json({ success: false, message: "Event not found" });
@@ -37,25 +23,12 @@ const createBooking = async (req, res) => {
     // Create Razorpay order
     const razorpayOrder = await razorpay.orders.create({
       amount: totalAmount * 100, // paise
-=======
-    const event = await Event.findById(eventId);
-    if (!event) return res.status(404).json({ success: false, message: "Event not found" });
-
-    // Create Razorpay order
-    const razorpayOrder = await razorpay.orders.create({
-      amount: totalAmount * 100,
->>>>>>> bd6794f7826b0140cc10a2df8ff03ed5923a125c
       currency: "INR",
       receipt: `receipt_${Date.now()}`,
     });
 
-<<<<<<< HEAD
     // Create booking in DB
     const booking = await Booking.create({
-=======
-    // Create booking
-    const booking = new Booking({
->>>>>>> bd6794f7826b0140cc10a2df8ff03ed5923a125c
       eventId,
       userId: req.user.id,
       tickets: selectedTickets,
@@ -66,30 +39,6 @@ const createBooking = async (req, res) => {
       status: "created",
     });
 
-<<<<<<< HEAD
-=======
-    // --- QR Code logic ---
-    const qrToken = jwt.sign(
-      { bookingId: booking._id, eventId, userId: req.user.id },
-      process.env.JWT_SECRET,
-      { expiresIn: "7d" }
-    );
-
-    booking.qrToken = qrToken;
-
-    // Generate QR as base64
-    const qrDataUrl = await QRCode.toDataURL(qrToken);
-
-    // Upload to Cloudinary
-    const uploadRes = await cloudinary.uploader.upload(qrDataUrl, {
-      folder: "event_passes",
-    });
-
-    booking.qrCode = uploadRes.secure_url;
-
-    await booking.save();
-
->>>>>>> bd6794f7826b0140cc10a2df8ff03ed5923a125c
     res.status(201).json({
       success: true,
       message: "Booking created successfully",
@@ -101,10 +50,6 @@ const createBooking = async (req, res) => {
   }
 };
 
-<<<<<<< HEAD
-=======
-
->>>>>>> bd6794f7826b0140cc10a2df8ff03ed5923a125c
 /* GET /bookings */
 const getBookings = async (req, res) => {
   const { status, upcoming, past } = req.query;
@@ -154,7 +99,6 @@ const cancelBooking = async (req, res) => {
     },
   });
 };
-<<<<<<< HEAD
 
 /* GET /bookings/download/:id (New Function) */
 const downloadTicket = async (req, res) => {
@@ -202,6 +146,3 @@ const downloadTicket = async (req, res) => {
 };
 
 module.exports = { getBookingById, getBookings, cancelBooking, createBooking, downloadTicket  }
-=======
-module.exports = { getBookingById, getBookings, cancelBooking, createBooking }
->>>>>>> bd6794f7826b0140cc10a2df8ff03ed5923a125c

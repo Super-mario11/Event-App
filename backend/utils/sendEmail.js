@@ -124,7 +124,6 @@ const sendBookingConfirmationEmail = async ({
   }
 };
 
-<<<<<<< HEAD
 const sendNewEventEmail = async ({ 
   email, 
   eventTitle, 
@@ -133,9 +132,6 @@ const sendNewEventEmail = async ({
   eventVenue,
   eventId
 }) => {
-=======
-const sendNewEventEmail = async ({ email, eventTitle, eventDate }) => {
->>>>>>> bd6794f7826b0140cc10a2df8ff03ed5923a125c
   try {
     const formatDate = (dateString) =>
       new Date(dateString).toLocaleDateString("en-US", {
@@ -144,7 +140,6 @@ const sendNewEventEmail = async ({ email, eventTitle, eventDate }) => {
         day: "numeric",
       });
 
-<<<<<<< HEAD
     // NOTE: Replace with your actual frontend URL if deployed
     const eventLink = `https://event-app.vercel.app//event/${eventId}`;
 
@@ -176,31 +171,12 @@ const sendNewEventEmail = async ({ email, eventTitle, eventDate }) => {
           <p style="margin-top: 25px; font-size: 12px; color: #777; text-align: center;">
             This email confirms the successful creation of your event on EventHive.
           </p>
-=======
-    const mailOptions = {
-      from: process.env.EMAIL,
-      to: email,
-      subject: `✨ New Event Added: ${eventTitle}`,
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;">
-          <h2 style="color: #f97316;">Exciting News!</h2>
-          <p>A new event has been added that might interest you:</p>
-          
-          <h3 style="color: #3b82f6;">${eventTitle}</h3>
-          <p><strong>Date:</strong> ${formatDate(eventDate)}</p>
-          
-          <p>Check it out and grab your tickets now!</p>
->>>>>>> bd6794f7826b0140cc10a2df8ff03ed5923a125c
         </div>
       `,
     };
 
     await transporter.sendMail(mailOptions);
-<<<<<<< HEAD
     console.log(`✅ New event confirmation email sent to ${email}`);
-=======
-    console.log(`✅ New event email sent to ${email}`);
->>>>>>> bd6794f7826b0140cc10a2df8ff03ed5923a125c
   } catch (error) {
     console.error("❌ Error sending new event email:", error.message);
     throw error;
@@ -212,8 +188,4 @@ module.exports = {
   sendStatusUpdateEmail,
   sendBookingConfirmationEmail,
   sendNewEventEmail,
-<<<<<<< HEAD
 };
-=======
-};
->>>>>>> bd6794f7826b0140cc10a2df8ff03ed5923a125c
