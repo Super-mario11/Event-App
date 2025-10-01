@@ -1,7 +1,11 @@
 const Event = require("../models/eventModel");
 const { uploadOnCloudinary } = require("../utils/cloudinary");
-const { sendNewEventEmail } = require("../utils/sendEmail"); // Import new email function
-const User = require("../models/userModel"); // Added for context/future bulk email capability
+const { sendNewEventEmail } = require("../utils/sendEmail");
+const User = require("../models/userModel"); // Ensure User model is imported
+const Booking = require('../models/bookingModel'); // Needed for future features/checks
+
+// Generate JWT (Assuming this is defined elsewhere or in userController, keeping minimal imports)
+// Note: Keeping this file focused on CRUD operations.
 
 // ✅ GET /events
 const getEvents = async (req, res) => {
@@ -74,7 +78,10 @@ const getEvents = async (req, res) => {
 // ✅ GET /events/:id
 const getEventById = async (req, res) => {
   try {
-    const event = await Event.findById(req.params.id);
+    // Populate organizer details for the frontend EventDetail page
+    const event = await Event.findById(req.params.id)
+      .populate('organizer.organizer_Id', 'name avatar email'); 
+      
     if (!event)
       return res
         .status(404)
@@ -86,11 +93,9 @@ const getEventById = async (req, res) => {
   }
 };
 
+
 const createEvent = async (req, res) => {
   try {
-    console.log("User:", req.user);
-
-    // Upload images
     let imageUrls = [];
     if (req.files?.length > 0) {
       for (const file of req.files) {
@@ -99,25 +104,22 @@ const createEvent = async (req, res) => {
       }
     }
 
-    // Parse form-data JSON
     let data = req.body;
-
     if (typeof req.body.eventData === "string") {
       data = JSON.parse(req.body.eventData);
     }
-    console.log(data);
-    // Explicitly map fields
+
     const newEvent = {
       title: data.title,
       description: data.description,
       category: data.category,
       date: data.date,
       time: data.time,
-      venue: data.location || data.venue, // your schema uses 'venue'
-      images: imageUrls, // all images
+      venue: data.location || data.venue,
+      images: imageUrls,
       price: parseFloat(data.generalPrice) || 0,
       organizer: {
-        organizer_Id: req.user.id, // <-- FIX: Assign organizer ID
+        organizer_Id: req.user.id,
         name: req.user.name,
         avatar: req.user.avatar || "",
       },
@@ -125,6 +127,7 @@ const createEvent = async (req, res) => {
       featured: data.featured || false,
       attendees: data.attendees || 0,
       rating: 0,
+      isDraft: data.isDraft || false, // Assuming a draft flag might be used
     };
 
     if (data.generalPrice && parseFloat(data.generalPrice) > 0) {
@@ -145,17 +148,16 @@ const createEvent = async (req, res) => {
       });
     }
 
-    // Create in DB
     const event = await Event.create(newEvent);
 
-    // Send New Event Email - UPDATED with more details
+    // Send New Event Email
     await sendNewEventEmail({
       email: req.user.email,
       eventTitle: event.title,
       eventDate: event.date,
-      eventTime: event.time, // <-- New parameter passed
-      eventVenue: event.venue, // <-- New parameter passed
-      eventId: event._id, // <-- New parameter passed
+      eventTime: event.time,
+      eventVenue: event.venue,
+      eventId: event._id,
     });
     
     res.status(201).json({
@@ -169,33 +171,91 @@ const createEvent = async (req, res) => {
   }
 };
 
-// ✅ PUT /events/:id
+// ✅ PUT /events/:id (Updated to handle multi-step form update)
 const updateEvent = async (req, res) => {
   try {
     const eventId = req.params.id;
+    let data = req.body;
+
+    // Parse eventData if it's sent as a JSON string (for multipart/form-data)
+    if (typeof req.body.eventData === "string") {
+      data = JSON.parse(req.body.eventData);
+    }
+
     const event = await Event.findById(eventId);
     if (!event)
       return res
         .status(404)
         .json({ success: false, message: "Event not found" });
+        
+    // Authorization check
+    if (event.organizer.organizer_Id.toString() !== req.user.id.toString()) {
+        return res.status(403).json({ success: false, message: "Not authorized to update this event" });
+    }
 
-    let newImages = event.images;
+    // 1. Handle Image Updates
+    let imageUrls = event.images;
     if (req.files?.length > 0) {
-      newImages = [];
+      imageUrls = [];
       for (const file of req.files) {
         const uploaded = await uploadOnCloudinary(file.path, "events");
-        if (uploaded?.url) newImages.push(uploaded.url);
+        if (uploaded?.url) imageUrls.push(uploaded.url);
       }
     }
+    
+    // 2. Construct the update object
+    const updateFields = {
+      title: data.title || event.title,
+      description: data.description || event.description,
+      category: data.category || event.category,
+      date: data.date || event.date,
+      time: data.time || event.time,
+      venue: data.location || data.venue || event.venue, // Frontend sends location or venue
+      images: imageUrls,
+      featured: data.featured ?? event.featured,
+      isDraft: data.isDraft ?? event.isDraft,
+      // Update basic price field for listing purposes
+      price: data.generalPrice ? parseFloat(data.generalPrice) : event.price, 
+    };
+
+    // 3. Handle Ticket Updates (Preserve sold counts)
+    const newTickets = [];
+    const existingTickets = event.tickets || [];
+    
+    // Helper to get sold count
+    const getSoldCount = (type) => existingTickets.find(t => t.type === type)?.sold || 0;
+
+    // General Admission
+    if (data.generalPrice && parseFloat(data.generalPrice) >= 0) {
+      newTickets.push({
+        type: "General Admission",
+        price: parseFloat(data.generalPrice),
+        quantity: parseInt(data.generalQuantity) || 0,
+        sold: getSoldCount("General Admission"),
+      });
+    }
+
+    // VIP Tickets
+    if (data.vipPrice && parseFloat(data.vipPrice) >= 0) {
+      newTickets.push({
+        type: "VIP",
+        price: parseFloat(data.vipPrice),
+        quantity: parseInt(data.vipQuantity) || 0,
+        sold: getSoldCount("VIP"),
+      });
+    }
+    
+    updateFields.tickets = newTickets;
 
     const updated = await Event.findByIdAndUpdate(
       eventId,
-      { ...req.body, images: newImages },
-      { new: true }
+      { $set: updateFields },
+      { new: true, runValidators: true }
     );
 
-    res.json({ success: true, data: updated });
+    res.json({ success: true, message: "Event updated successfully", data: updated });
   } catch (err) {
+    console.error("Error updating event:", err);
     res.status(500).json({ success: false, message: err.message });
   }
 };
@@ -203,11 +263,19 @@ const updateEvent = async (req, res) => {
 // ✅ DELETE /events/:id
 const deleteEvent = async (req, res) => {
   try {
-    const event = await Event.findByIdAndDelete(req.params.id);
+    const event = await Event.findById(req.params.id);
+
     if (!event)
       return res
         .status(404)
         .json({ success: false, message: "Event not found" });
+
+    // Authorization check: only organizer can delete
+    if (event.organizer.organizer_Id.toString() !== req.user.id.toString()) {
+        return res.status(403).json({ success: false, message: "Not authorized to delete this event" });
+    }
+    
+    await Event.deleteOne({ _id: event._id });
 
     res.json({ success: true, message: "Event deleted successfully" });
   } catch (err) {
