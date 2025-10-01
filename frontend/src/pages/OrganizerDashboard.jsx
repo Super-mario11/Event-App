@@ -11,7 +11,6 @@ import EditProfile from '../components/EditProfile';
 const OrganizerDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [loading, setLoading] = useState(false);
-<<<<<<< HEAD
   const [stats, setStats] = useState({});
   const [recentBookings, setRecentBookings] = useState([]);
   const [allOrganizerEvents, setAllOrganizerEvents] = useState([]);
@@ -141,51 +140,6 @@ const OrganizerDashboard = () => {
   const statCards = [
     { label: 'Total Events', value: stats.totalEvents || 0, icon: Calendar, color: 'primary' },
     { label: 'Total Revenue', value: `₹${stats.totalRevenue || 0}`, icon: DollarSign, color: 'green' },
-=======
-  const [myEvents, setMyEvents] = useState([]);
-  const [bookings, setBookings] = useState([]);
-  const [stats, setStats] = useState({});
-
-  useEffect(() => {
-    const getDashboard = async () => {
-      try {
-        setLoading(true);
-        const { data } = await axiosInstance.get("/organizer/dashboard");
-
-        // Enrich recentEvents with ticketsSold, revenue, etc.
-        const enrichedEvents = data.data.recentEvents.map((event) => {
-          const eventBookings = data.data.recentBookings.filter(
-            (b) => b.eventId === event._id
-          );
-          const ticketsSold = eventBookings.reduce((sum, b) => sum + (b.quantity || 0), 0);
-          const totalTickets = event.totalTickets || 100; // fallback default
-          const revenue = eventBookings.reduce((sum, b) => sum + (b.totalPrice || 0), 0);
-          return {
-            ...event,
-            ticketsSold,
-            totalTickets,
-            revenue,
-            status: event.status || "Draft",
-          };
-        });
-
-        setMyEvents(enrichedEvents);
-        setBookings(data.data.recentBookings);
-        setStats(data.data.stats);
-      } catch (err) {
-        console.error("Error fetching dashboard:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    getDashboard();
-  }, []);
-
-  const statCards = [
-    { label: 'Total Events', value: stats.totalEvents || 0, icon: Calendar, color: 'primary' },
-    { label: 'Total Revenue', value: `$${stats.totalRevenue || 0}`, icon: DollarSign, color: 'green' },
->>>>>>> bd6794f7826b0140cc10a2df8ff03ed5923a125c
     { label: 'Tickets Sold', value: stats.ticketsSold || 0, icon: Users, color: 'blue' },
     { label: 'Avg. Rating', value: stats.avgRating || 0, icon: TrendingUp, color: 'accent' },
   ];
@@ -195,11 +149,7 @@ const OrganizerDashboard = () => {
   return (
     <div className="min-h-screen bg-gray-50 pt-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-<<<<<<< HEAD
         {/* Header */}
-=======
- 
->>>>>>> bd6794f7826b0140cc10a2df8ff03ed5923a125c
         <div className="mb-8 flex flex-col lg:flex-row lg:items-center lg:justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Organizer Dashboard</h1>

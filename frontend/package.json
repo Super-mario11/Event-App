@@ -13,20 +13,11 @@
     "@reduxjs/toolkit": "^2.0.1",
     "axios": "^1.6.2",
     "date-fns": "^2.30.0",
-<<<<<<< HEAD
-=======
-    "jspdf": "^3.0.3",
->>>>>>> bd6794f7826b0140cc10a2df8ff03ed5923a125c
     "lucide-react": "^0.344.0",
     "qrcode": "^1.5.4",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.48.2",
-<<<<<<< HEAD
-=======
-    "react-qr-reader": "^3.0.0-beta-1",
-    "react-qr-scanner": "^1.0.0-alpha.11",
->>>>>>> bd6794f7826b0140cc10a2df8ff03ed5923a125c
     "react-redux": "^9.0.4",
     "react-router-dom": "^6.21.0"
   },
