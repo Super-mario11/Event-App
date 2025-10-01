@@ -99,4 +99,50 @@ const cancelBooking = async (req, res) => {
     },
   });
 };
-module.exports = { getBookingById, getBookings, cancelBooking, createBooking }
+
+/* GET /bookings/download/:id (New Function) */
+const downloadTicket = async (req, res) => {
+  try {
+    const bookingId = req.params.id;
+
+    const booking = await Booking.findOne({ bookingId }).populate("eventId");
+    
+    if (!booking) {
+      return res.status(404).json({ success: false, message: "Booking not found" });
+    }
+
+    if (booking.userId.toString() !== req.user.id.toString()) {
+      return res.status(403).json({ success: false, message: "Unauthorized access to booking" });
+    }
+
+    // In a real application, this is where you'd generate a QR code and a PDF/HTML ticket.
+    // We simulate the data required for a PDF ticket.
+    const ticketData = {
+      bookingId: booking.bookingId,
+      attendeeName: booking.attendeeInfo.name,
+      eventTitle: booking.eventId.title,
+      eventDate: booking.eventId.date,
+      eventTime: booking.eventId.time,
+      venue: booking.eventId.venue,
+      tickets: booking.tickets,
+      totalAmount: booking.totalAmount,
+      // Placeholder for a generated token/QR code data
+      accessCode: `TICKET-${booking.bookingId.slice(2, 10)}`,
+      // In a real application, you might embed the event image or a generated QR image URL here.
+    };
+
+    // For simplicity, we send the data instead of a generated file.
+    // The frontend will treat this successful response as 'download success'.
+    res.json({
+      success: true,
+      message: "Ticket data retrieved successfully (simulated PDF)",
+      data: ticketData,
+    });
+
+  } catch (err) {
+    console.error("Error in downloadTicket:", err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+module.exports = { getBookingById, getBookings, cancelBooking, createBooking, downloadTicket  }
