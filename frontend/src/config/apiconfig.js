@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // ✅ Use only Vite's env variables
-const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+const apiUrl = "https://event-backend-gold.vercel.app/api";
 
 const axiosInstance = axios.create({
   baseURL: apiUrl,
